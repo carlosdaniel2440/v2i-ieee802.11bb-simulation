@@ -1,0 +1,134 @@
+\chapter{RESULTADOS Y DISCUSIÓN}
+
+\section{Línea de Base Teórica y Comparativa Preliminar}
+Antes de abordar el análisis tridimensional y dinámico del enlace vehicular elevado (V2I), se establece una línea de base teórica y una comparativa física preliminar con el fin de calibrar el comportamiento del transceptor óptico multiportadora DCO-OFDM.
+
+\subsection{Desempeño Teórico en Canal AWGN Ideal}
+La Figura \ref{fig:rendimiento_ideal} presenta la Tasa de Error de Bit (BER) y el Throughput efectivo en función de la relación señal a ruido (SNR) eléctrica recibida en un canal ideal bajo modelo AWGN puro para los doce esquemas de modulación y codificación (desde MCS 0 hasta MCS 11) definidos en la capa física del estándar IEEE 802.11bb. Esta simulación de referencia representa el límite analítico superior del transceptor bajo un Intervalo de Guarda (GI) seleccionado de $0.8\,\mu\text{s}$ (64 muestras) y una tasa de muestreo de 80 MHz, operando en un canal de visibilidad directa (LOS) a una distancia fija de $1.0\text{ metro}$ sin atenuación atmosférica ($\beta = 0.0\text{ m}^{-1}$) ni ruido solar ($E_{\text{sol}} = 0\text{ W/m}^2$). La simulación se ejecuta con $10,000$ bits de información independientes por cada nivel de SNR (barrido de 5 a 41 dB en pasos de 3 dB) utilizando modulación multiportadora DCO-OFDM con 234 subportadoras de datos activas moduladas a una frecuencia intermedia de 20 MHz.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{curvas_rendimiento_ideal.png}
+\caption{Curvas de BER vs. SNR eléctrica teórica en canal AWGN ideal para todos los doce esquemas MCS (del MCS 0 al MCS 11) definidos en el estándar IEEE 802.11bb.}
+\label{fig:rendimiento_ideal}
+\end{figure}
+
+Esta gráfica de referencia permite observar el espaciamiento característico de la cascada de todas las modulaciones y tasas de codificación convolucional del estándar:
+\begin{itemize}
+    \item Los esquemas de modulación robustos basados en BPSK (MCS 0, 8.6 Mbps) y QPSK (MCS 1 con tasa 1/2 y MCS 2 con tasa 3/4, ofreciendo 17.2 y 25.8 Mbps respectivamente) alcanzan el límite de viabilidad del decodificador de Viterbi (BER = $10^{-3}$) a relaciones señal a ruido bajas entre $6\text{ dB}$ y $11\text{ dB}$.
+    \item Los esquemas basados en 16-QAM (MCS 3 con tasa 1/2 y MCS 4 con tasa 3/4, logrando 34.4 y 51.6 Mbps) requieren SNRs de $12\text{ dB}$ a $15\text{ dB}$.
+    \item Los esquemas de 64-QAM (MCS 5 con tasa 2/3, MCS 6 con tasa 3/4 y MCS 7 con tasa 5/6, proporcionando 68.8, 77.4 y 86.0 Mbps) exigen SNRs de $18\text{ dB}$ a $22\text{ dB}$ debido a la mayor compactación de sus símbolos.
+    \item Los esquemas densos de alta eficiencia espectral basados en 256-QAM (MCS 8 con tasa 3/4 y MCS 9 con tasa 5/6, logrando 103.2 y 114.7 Mbps) y 1024-QAM (MCS 10 con tasa 3/4 y MCS 11 con tasa 5/6, logrando velocidades máximas de 129.0 y 143.4 Mbps) son altamente susceptibles al ruido y requieren relaciones señal a ruido elevadas de $26\text{ dB}$ a $38\text{ dB}$ para lograr una comunicación viable.
+\end{itemize}
+
+\subsection{Impacto del Clima y Ruido Solar en Distancia (Enlace Alineado)}
+Para aislar y contrastar de manera directa los efectos de la extinción atmosférica ($\beta$) y de la irradiancia solar de fondo ($E_{\text{sol}}$) a lo largo de la distancia de propagación, la Figura \ref{fig:rendimiento_escenarios} evalúa un enlace horizontal perfectamente alineado ($\phi = 0^\circ, \psi = 0^\circ$) empleando la modulación de referencia QPSK (MCS 1, velocidad nominal bruta de $17.206\text{ Mbps}$). El barrido físico se realiza desde $2\text{ metros}$ hasta $40\text{ metros}$ de distancia lineal, utilizando una tasa de muestreo de 80 MHz, un Intervalo de Guarda (GI) de $0.8\,\mu\text{s}$, y un área de captación física del fotodetector calibrada de $10\text{ cm}^2$ ($10\text{e-4}\text{ m}^2$) equipada con un filtro óptico de paso de banda de ultra-alta selectividad (99.7\% de rechazo solar). Cada punto de distancia se simula de manera independiente empleando una rutina de Monte Carlo de $10,000$ bits de información para reproducir las siguientes condiciones climáticas específicas:
+\begin{itemize}
+    \item \textbf{Noche Despejada (Canal Ideal):} Irradiancia solar de fondo nula ($E_{\text{sol}} = 0\text{ W/m}^2$) y sin atenuación atmosférica ($\beta = 0.0\text{ m}^{-1}$). El enlace está limitado únicamente por el ruido térmico del fotodiodo ($10^{-16}\text{ A}^2$).
+    \item \textbf{Día Soleado (Ruido Solar Severo):} Irradiancia solar bruta de $150\text{ W/m}^2$ que, tras la atenuación del filtro del 99.7\%, genera una irradiancia de fondo efectiva de $0.5\text{ W/m}^2$ en el receptor. No hay pérdidas atmosféricas adicionales ($\beta = 0.0\text{ m}^{-1}$).
+    \item \textbf{Lluvia Moderada (Atenuación Óptica y Luz Nublada):} Irradiancia solar bruta de $50\text{ W/m}^2$ (cielo encapotado/nublado), reducida a una irradiancia efectiva de $0.2\text{ W/m}^2$ por el filtro. Introduce una pérdida extrínseca de propagación por dispersión geométrica gobernada por un coeficiente de extinción $\beta = 0.05\text{ m}^{-1}$.
+    \item \textbf{Neblina Moderada (Dispersión Extrema):} Irradiancia solar bruta de $30\text{ W/m}^2$, atenuada a $0.1\text{ W/m}^2$ efectiva. Introduce una pérdida óptica extrema debida al coeficiente de extinción por esparcimiento de Mie de $\beta = 0.15\text{ m}^{-1}$ (lo que reduce drásticamente la potencia del haz en un factor de $e^{-0.15 \cdot d}$).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{curvas_rendimiento_escenarios.png}
+\caption{Tasa de Error de Bit (BER) y Throughput efectivo en función de la distancia de propagación en enlace horizontal alineado para los cuatro escenarios climáticos.}
+\label{fig:rendimiento_escenarios}
+\end{figure}
+
+El análisis de la Figura \ref{fig:rendimiento_escenarios} revela los siguientes puntos clave:
+\begin{itemize}
+    \item \textbf{Noche Despejada:} Se comporta de forma ideal, manteniendo una comunicación libre de errores (BER = $10^{-6}$) y un throughput constante de $17.2\text{ Mbps}$ a lo largo de todo el trayecto de $40\text{ metros}$, al no sufrir atenuación atmosférica ni ruido solar.
+    \item \textbf{Día Soleado:} A pesar de no existir atenuación atmosférica ($\beta = 0.0\text{ m}^{-1}$), la irradiancia solar de fondo de $0.5\text{ W/m}^2$ efectiva genera un ruido de disparo que degrada el enlace a partir de los $15\text{ metros}$ de distancia.
+    \item \textbf{Lluvia Moderada:} La atenuación atmosférica de $\beta = 0.05\text{ m}^{-1}$ reduce gradualmente la amplitud de la señal recibida, provocando que el BER comience a subir a partir de los $15\text{ metros}$ y supere el límite de viabilidad cerca de los $18\text{ metros}$.
+    \item \textbf{Neblina Moderada:} Representa el caso más adverso debido al esparcimiento óptico severo ($\beta = 0.15\text{ m}^{-1}$). El BER supera el umbral de viabilidad a partir de los $12\text{ metros}$ de distancia, cayendo el throughput efectivo a valores mínimos.
+\end{itemize}
+
+\section{Análisis de los Resultados de la Simulación Matricial}
+En este capítulo se presentan y discuten los resultados obtenidos a partir de la simulación matricial en rejilla de $4\times3$ (cuatro escenarios climáticos dispuestos en filas y tres Intervalos de Guarda dispuestos en columnas) de la capa física LiFi basada en el estándar IEEE 802.11bb. Este análisis evalúa de forma integrada el comportamiento del transceptor multiportadora DCO-OFDM bajo las restricciones geométricas de un entorno vehicular Vehículo a Infraestructura (V2I) a lo largo de un trayecto de hasta $50\text{ metros}$.
+
+Se evalúan los tres esquemas de modulación y codificación (MCS) más representativos del estándar:
+\begin{itemize}
+    \item \textbf{MCS 0:} BPSK, codificación convolucional con tasa $1/2$, diseñado para máxima robustez a costa de una menor tasa nominal de datos.
+    \item \textbf{MCS 5:} 64-QAM, codificación convolucional con tasa $2/3$, que representa un punto de operación intermedio de alta eficiencia espectral.
+    \item \textbf{MCS 11:} 1024-QAM, codificación convolucional con tasa $5/6$, diseñado para ultra-alta velocidad en condiciones óptimas de canal.
+\end{itemize}
+
+Estos esquemas son sometidos a variaciones del Intervalo de Guarda ($GI = 0.8\,\mu\text{s}$, $1.6\,\mu\text{s}$ y $3.2\,\mu\text{s}$) y evaluados en los cuatro escenarios climáticos característicos definidos en el Capítulo 2: Noche Despejada, Día Soleado, Lluvia Moderada y Neblina Moderada.
+
+\subsection{Tasa de Error de Bit (BER) vs. SNR Eléctrica}
+La Figura \ref{fig:grid_snr} presenta el comportamiento de la Tasa de Error de Bit (BER) en función de la Relación Señal a Ruido (SNR) eléctrica instantánea medida en el fotodetector, bajo un ángulo de inclinación estático intermedio de $\theta \approx 21.8^\circ$ (equivalente a una distancia horizontal fija de 10 metros al semáforo).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{curvas_rendimiento_grid_snr.png}
+\caption{Tasa de Error de Bit (BER) vs. SNR Eléctrica (dB) organizada en una matriz de $4\times3$ (filas: escenarios ambientales, columnas: Intervalos de Guarda).}
+\label{fig:grid_snr}
+\end{figure}
+
+El análisis de la Figura \ref{fig:grid_snr} revela los siguientes puntos clave:
+\begin{itemize}
+    \item \textbf{Robustez del Esquema MCS 0 (BPSK):} Al ser una modulación binaria con gran distancia euclidiana entre símbolos, es el esquema más robusto. Logra alcanzar el umbral de BER objetivo de $10^{-3}$ (límite de viabilidad para códigos FEC convolucionales antes de su decodificación por el algoritmo de Viterbi) con una SNR eléctrica de apenas $6\text{ dB}$ a $8\text{ dB}$.
+    \item \textbf{Requerimientos del Esquema MCS 5 (64-QAM):} Debido a la mayor densidad de su constelación, requiere una SNR eléctrica de aproximadamente $18\text{ dB}$ a $20\text{ dB}$ para alcanzar el mismo umbral de BER de $10^{-3}$.
+    \item \textbf{Sensibilidad al Ruido del Esquema MCS 11 (1024-QAM):} Al tener una distancia euclidiana extremadamente reducida entre los 1024 puntos de su constelación, es altamente susceptible a la interferencia y el ruido térmico. Requiere una SNR mínima de aproximadamente $30\text{ dB}$ a $32\text{ dB}$ para lograr una comunicación viable.
+    \item \textbf{Independencia del Intervalo de Guarda (GI):} Se observa que la duración del Intervalo de Guarda (columnas) no altera la forma de las curvas de BER vs. SNR. Esto es físicamente consistente con la teoría de sistemas multiportadora, ya que el prefijo cíclico no modifica la distancia euclidiana de la constelación ni atenúa el ruido blanco aditivo; su función principal es proteger la señal frente a la interferencia intersimbólica (ISI) inducida por la propagación multicamino, la cual no está presente en un canal óptico de visibilidad directa plana (LOS).
+    \item \textbf{Superposición por Normalización de SNR:} Gracias a que las curvas se grafican directamente en función de la SNR eléctrica efectiva medida en el receptor, las curvas de modulación se superponen de manera consistente en todas las filas (escenarios climáticos), demostrando la validez matemática del receptor implementado.
+\end{itemize}
+
+\subsection{Tasa de Error de Bit (BER) vs. Distancia Horizontal}
+La Figura \ref{fig:grid_ber_dist} ilustra la evolución del BER conforme el vehículo se desplaza horizontalmente sobre la calle hacia el semáforo ($x$ varía desde $2\text{ metros}$ hasta $50\text{ metros}$), involucrando la geometría del enlace elevado y la variación dinámica de los ángulos de incidencia y recepción. Para una representación visual óptima y libre de la varianza estadística inherente a las simulaciones Monte Carlo con menor número de bits, se aplicó un filtro de suavizado logarítmico sobre los datos del BER.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{curvas_rendimiento_grid_ber_dist.png}
+\caption{Tasa de Error de Bit (BER) vs. Distancia Horizontal (m) en configuración V2I elevada hasta 50 metros.}
+\label{fig:grid_ber_dist}
+\end{figure}
+
+A partir de las curvas obtenidas en la Figura \ref{fig:grid_ber_dist}, se identifican tres fenómenos físicos y geométricos de gran relevancia:
+\begin{enumerate}
+    \item \textbf{Efecto de Punto Ciego Cercano ($x < 2.3$ metros):}
+    A distancias muy cortas de la línea de parada del semáforo, el BER se degrada de forma abrupta alcanzando el límite teórico de $0.5$ (pérdida total del enlace) en todos los MCS. Este fenómeno responde a la limitación física del Campo de Visión (FOV) del receptor ($60^\circ$). Al situarse el vehículo debajo del semáforo, el ángulo de incidencia de los rayos de luz supera los $60^\circ$ con respecto a la vertical, provocando que la ganancia del concentrador óptico de refracción caiga a cero de forma instantánea ($g(\psi) = 0$). Este es un resultado de alta fidelidad que valida la importancia de los modelos angulares dinámicos en el diseño de infraestructura urbana.
+    \item \textbf{Comportamiento en Zona de Cobertura Óptima ($x = 4$ a $15$ metros):}
+    En esta región, el ángulo de elevación de la luz entrante es altamente favorable y la atenuación por distancia es mínima, lo que genera una SNR muy elevada. Como resultado, todos los esquemas (incluyendo el sensible MCS 11) alcanzan un BER libre de errores (representado por el límite visual de $10^{-6}$).
+    \item \textbf{Degradación Dinámica por Escenario Climático a Larga Distancia ($x > 20$ metros):}
+    Conforme el vehículo se aleja, la atenuación geométrica de la irradiancia ($1/d^2$) reduce la potencia óptica recibida. El impacto de cada escenario se detalla a continuación:
+    \begin{itemize}
+        \item \textbf{Noche Despejada:} Al no existir ruido de disparo solar, el receptor opera únicamente limitado por el ruido térmico interno del fotodetector. El esquema MCS 0 (BPSK) y el MCS 5 (64-QAM) son perfectamente viables hasta los $50\text{ metros}$ de distancia. Sin embargo, el esquema MCS 11 (1024-QAM) experimenta su límite de viabilidad a los $32\text{ metros}$ de distancia, donde el BER se mantiene por debajo de $10^{-3}$.
+        \item \textbf{Día Soleado:} La radiación solar indirecta genera una corriente de ruido de disparo efectiva de $0.5\text{ W/m}^2$. El alcance de MCS 11 es de hasta $15\text{ metros}$ de distancia, el de MCS 5 es de hasta $25\text{ metros}$, y el robusto MCS 0 logra mantener la comunicación durante todo el trayecto de hasta $50\text{ metros}$ con un BER libre de errores tras salir del punto ciego cercano.
+        \item \textbf{Lluvia Moderada:} La lluvia introduce una atenuación por extinción óptica leve ($\beta = 0.05\text{ m}^{-1}$) y opera con una irradiancia solar de fondo reducida. MCS 11 es viable hasta los $12\text{ metros}$, MCS 5 hasta los $18\text{ metros}$ y el robusto MCS 0 mantiene el enlace hasta los $32\text{ metros}$.
+        \item \textbf{Neblina Moderada:} La neblina es el escenario más crítico debido al fuerte coeficiente de extinción por esparcimiento de Mie ($\beta = 0.15\,\text{m}^{-1}$). El alcance viable de MCS 11 se reduce a un canal muy estrecho de $6$ a $10\text{ metros}$. MCS 5 es viable hasta los $8\text{ metros}$ y MCS 0 mantiene el enlace hasta un máximo de $15\text{ metros}$.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Throughput Efectivo vs. Distancia Horizontal}
+La Figura \ref{fig:grid_throughput} presenta la tasa de transferencia neta de datos (throughput efectivo en Mbps) en función de la distancia horizontal, reflejando el impacto de la sobrecarga del Intervalo de Guarda y la viabilidad de la transmisión libre de errores.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{curvas_rendimiento_grid_throughput.png}
+\caption{Throughput Efectivo (Mbps) vs. Distancia Horizontal (m) en entorno vehicular V2I con barrido hasta 50 metros.}
+\label{fig:grid_throughput}
+\end{figure}
+
+El análisis del throughput neto permite concluir lo siguiente:
+\begin{itemize}
+    \item \textbf{Penalización por Sobrecarga de Intervalo de Guarda (Overhead):}
+    La velocidad máxima de transmisión disminuye a medida que aumenta la duración del Intervalo de Guarda (GI). Para el esquema MCS 11 (1024-QAM):
+    \begin{itemize}
+        \item Con un \textbf{GI de 0.8 $\mu$s}, el throughput máximo alcanzado en la zona óptima es de **143.38 Mbps**.
+        \item Con un \textbf{GI de 1.6 $\mu$s}, la velocidad máxima se reduce a **135.42 Mbps**.
+        \item Con un \textbf{GI de 3.2 $\mu$s}, la velocidad máxima cae a **121.88 Mbps**.
+    \end{itemize}
+    Esto representa una pérdida de velocidad de hasta el 15\% debido a la inserción de prefijos cíclicos más largos. En entornos urbanos donde los rebotes y dispersión por multitrayecto de la luz sobre el asfalto son severos, se justifica el uso de intervalos de guarda más amplios (como 3.2 $\mu$s) a costa de esta reducción en la tasa de datos para asegurar un enlace estable y libre de interferencia intersimbólica.
+    \item \textbf{Comportamiento Dinámico del Enlace:}
+    Se aprecia de forma muy clara cómo cada modulación mantiene su tasa plana máxima de transferencia en las zonas donde el BER es inferior al límite corregible. Al superarse la distancia crítica de cada escenario, el throughput de las modulaciones densas cae a cero de forma de escalón. Este comportamiento binario en el rendimiento del throughput fundamenta la necesidad de implementar algoritmos de adaptación dinámica de tasa (Link Adaptation) en redes vehiculares LiFi reales, conmutando activamente entre MCS 11, MCS 5 y MCS 0 a medida que el auto se desplaza para asegurar un flujo de datos continuo y sin cortes.
+\end{itemize}
+
+\section{Conclusiones}
+[Escriba aquí las conclusiones del trabajo de integración curricular]
+
+\section{Recomendaciones}
+[Escriba aquí las recomendaciones para futuros trabajos]
+

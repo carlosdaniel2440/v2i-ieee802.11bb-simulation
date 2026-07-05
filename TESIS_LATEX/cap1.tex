@@ -1,0 +1,313 @@
+\chapter{INTRODUCCIÓN}
+
+\section{OBJETIVO GENERAL}
+Implementar un enlace vehículo a infraestructura (V2I) basado en la capa física del estándar IEEE 802.11bb dentro del espectro de la luz visible VLC con una de simulación en Python, con el fin de analizar estadísticamente el impacto de condiciones climáticas adversas sobre la confiabilidad y el desempeño del enlace óptico en entornos urbanos en términos de BER, SNR y tasa efectiva de transmisión.
+
+\section{OBJETIVOS ESPECÍFICOS}
+\begin{enumerate}
+	\item Desarrollar la fundamentación teórica y matemática del transmisor-receptor basados en la capa física del estándar IEEE 802.11bb.
+	\item Diseñar y programar en Python el motor de simulación de la capa física, incluyendo las etapas de transmisión y recepción conectadas por el canal óptico.
+	\item Evaluar el desempeño del canal óptico-vehicular mediante su comparación con un canal equivalente AWGN, desarrollando simulaciones en condiciones climáticas propias de entornos urbanos y presentando los resultados en términos de BER versus SNR y velocidad efectiva de transmisión, con el fin de verificar la coherencia entre los resultados numéricos y el comportamiento teórico esperado del enlace.
+\end{enumerate}
+
+\section{ALCANCE}
+El presente Trabajo de Integración Curricular contempla el diseño, implementación y evaluación de un modelo de simulación de un sistema de comunicación vehicular óptica en un enlace vehículo a infraestructura (V2I) y fundamentado en los principios técnicos del estándar IEEE 802.11bb. El estudio se desarrollará a nivel de capa física, considerando un enlace óptico inalámbrico en línea de vista (LOS).
+
+En la fase de diseño se establecerá la fundamentación teórica y matemática de los bloques que conforman el sistema de comunicación a simular, incluyendo transmisor-receptor y el canal óptico-vehicular. Se definirá el modelo de generación de bits, codificación FEC, modulación digital y procesamiento OFDM (mapeo de subportadoras, IFFT e inserción de prefijo cíclico), junto con la adaptación de la señal al esquema de modulación en intensidad y detección directa mediante la adición de un bias DC y el modelado de la conversión eléctrica-óptica del LED considerando su respuesta en frecuencia y posibles no linealidades. Se diseñará el modelo del canal óptico VLC en línea de vista (LOS) con patrón de radiación Lambertiano, parámetros geométricos del enlace y fuentes de ruido óptico. Se establecerá el modelo del receptor incluyendo el fotodetector con su responsividad y la cadena de procesamiento inversa compuesta por remoción de prefijo cíclico, FFT, demapeo, demodulación y decodificación, permitiendo la recuperación de los bits transmitidos y la evaluación analítica del desempeño del sistema.
+
+En la fase de implementación se desarrollará en Python el motor de simulación que integrará los bloques de transmisión, canal óptico y recepción dentro de una misma cadena funcional. Posteriormente, el sistema se someterá a una evaluación bajo un canal equivalente AWGN, comparando los resultados obtenidos con el comportamiento teórico esperado y presentando métricas en términos de BER versus SNR y velocidad efectiva de transmisión, con el propósito de verificar la coherencia del modelo en condiciones controladas antes de analizar escenarios atmosféricos propios del entorno urbano.
+
+En la fase de pruebas, evaluación y análisis, se ejecutarán simulaciones mediante el método de Montecarlo para analizar el desempeño del sistema bajo diferentes condiciones climáticas. Se estimarán métricas como la tasa de error de bit (BER), la relación señal a ruido (SNR) y la tasa efectiva de transmisión.
+
+El alcance se limita al análisis mediante simulación computacional y no contempla implementación experimental en hardware ni validación en entornos reales.
+
+\section{MARCO TEÓRICO}
+En la era de los Sistemas Inteligentes de Transporte (ITS, \textit{Intelligent Transportation Systems}) y la conducción autónoma, la comunicación vehicular V2X (\textit{Vehicle-to-Everything}) es parte importante para garantizar la seguridad vial, la eficiencia del tráfico y la coordinación en tiempo real entre vehículos, infraestructuras y usuarios. Tradicionalmente, las tecnologías basadas en radiofrecuencia (RF) como DSRC (\textit{Dedicated Short-Range Communications}) basada en IEEE 802.11p y C-V2X (\textit{Cellular Vehicle-to-Everything}) basada en estándares celulares LTE/5G han impulsado estos avances. Sin embargo, como se analiza en \cite{feukeu2023enhancing}, estas tecnologías enfrentan limitaciones crecientes en entornos urbanos congestionados, tales como el espectro saturado, la interferencia electromagnética y la latencia en escenarios de alta densidad.
+
+Ante este panorama, la Comunicación por Luz Visible (VLC, \textit{Visible Light Communication}) surge como una alternativa complementaria altamente prometedora, al aprovechar la infraestructura de iluminación LED (\textit{Light Emitting Diode}) ya existente en faros, luces traseras y semáforos para transmitir datos a través del espectro visible. Entre sus ventajas, discutidas en el trabajo de Georlette \textit{et al.} \cite[pp. 1--5]{georlette2020visible}, se encuentran un ancho de banda infrautilizado, inmunidad a interferencias de RF y una mayor seguridad física del enlace.
+
+El estándar IEEE 802.11bb-2023 (\textit{Amendment 6: Light Communications}) \cite{ieee80211bb2023} es especialmente relevante para redes vehiculares. Según se especifica en su Cláusula 33, este documento define las modificaciones necesarias en las capas física (PHY, \textit{Physical Layer}) y de control de acceso al medio (MAC, \textit{Medium Access Control}) para habilitar la comunicación por luz, garantizando la interoperabilidad con la infraestructura de iluminación vehicular. Estas especificaciones sientan las bases teóricas para el desarrollo de simulaciones orientadas a evaluar la viabilidad de protocolos de alta eficiencia en escenarios prácticos de movilidad.
+
+\subsection{Comunicación Vehicular y Principios de los Sistemas VLC}
+La comunicación vehicular representa uno de los pilares de los Sistemas Inteligentes de Transporte (ITS). Consiste en el intercambio de información en tiempo real entre vehículos y su entorno para mejorar la seguridad, reducir congestiones y habilitar aplicaciones de conducción autónoma. Dentro de este contexto, la Comunicación por Luz Visible (VLC) emerge como una tecnología óptica inalámbrica que utiliza el espectro visible (y cercano al infrarrojo) para transmitir datos modulando la intensidad de la luz emitida por LEDs. A diferencia de las tecnologías RF, VLC ofrece un espectro libre de licencias, alta direccionalidad y nula interferencia electromagnética, lo que la posiciona como una solución complementaria ideal para escenarios de corto y medio alcance en entornos vehiculares \cite{feukeu2023enhancing, georlette2020visible}.
+
+\subsubsection{Arquitectura de comunicación vehicular V2X y el entorno V2I}
+La comunicación V2X integra diversas modalidades de intercambio de información según los actores involucrados: Comunicación Vehículo a Vehículo (V2V, \textit{Vehicle-to-Vehicle}) para la seguridad cooperativa entre automóviles; Comunicación Vehículo a Infraestructura (V2I, \textit{Vehicle-to-Infrastructure}) para la interacción con elementos viales; Comunicación Vehículo a Peatón (V2P, \textit{Vehicle-to-Pedestrian}) orientada a la protección de usuarios vulnerables; y Comunicación Vehículo a Red (V2N, \textit{Vehicle-to-Network}) para la conexión con servicios en la nube. Este conjunto constituye un elemento esencial de los ITS al habilitar el intercambio de datos en tiempo real, lo que permite una gestión dinámica del entorno vial \cite{feukeu2023enhancing}.
+
+La arquitectura V2I, que es el enfoque principal de la simulación de este trabajo, se basa en la comunicación bidireccional entre vehículos y elementos fijos de la infraestructura vial. Sus componentes principales incluyen faros y luces traseras, semáforos y luminarias urbanas, y fotodiodos instalados en los vehículos. Un elemento central en este entorno son las \textit{Road Side Units} (RSU), las cuales actúan como \textit{gateways} de comunicación que gestionan el flujo de datos entre la red troncal y los usuarios de la vía \cite[p. 2]{georlette2020visible}.
+
+Esta arquitectura permite aplicaciones críticas como la sincronización de fases de semáforos, alertas de peligro en intersecciones y el control de velocidad mediante mensajes de seguridad de baja latencia. La relevancia de centrar la simulación en el enlace V2I radica en la estabilidad de la infraestructura fija, lo que facilita el despliegue inicial de sistemas basados en el estándar IEEE 802.11bb en entornos de ciudades inteligentes \cite{feukeu2023enhancing}.
+
+\subsubsection{Principios fundamentales de los sistemas VLC mediante espectro visible y modulación por intensidad}
+Un sistema VLC se compone de tres bloques principales: emisor, canal óptico y receptor \cite{georlette2020visible}. El emisor convierte la información eléctrica en variaciones de intensidad luminosa mediante LEDs o diodos orgánicos emisores de luz (OLED, \textit{Organic Light Emitting Diode}). El canal corresponde al medio físico de propagación de las ondas ópticas, mientras que el receptor transforma la intensidad captada nuevamente en una señal eléctrica para su posterior procesamiento \cite{georlette2020visible}.
+
+El espectro operativo de VLC abarca convencionalmente la banda visible entre los 400 nm y 750 nm. No obstante, como se especifica en el documento del estándar \cite[p. 19]{ieee80211bb2023}, el estándar extiende este concepto operativo al rango de los 800 nm a 1000 nm para las comunicaciones por luz, permitiendo el uso del infrarrojo cercano para mejorar la eficiencia y reducir la distracción visual.
+
+La técnica de modulación empleada de manera casi universal es la Modulación por Intensidad con Detección Directa (IM/DD, \textit{Intensity Modulation / Direct Detection}). En este esquema, la información se codifica variando la potencia óptica instantánea de la fuente sin modificar su fase ni su frecuencia coherente. En el extremo receptor, se emplea detección directa mediante fotodiodos, los cuales generan una corriente eléctrica proporcional a la potencia óptica incidente, simplificando significativamente el diseño del transceptor al no requerir complejos sistemas de recuperación de portadora \cite{georlette2020visible}.
+
+\subsubsection{Modelos matemáticos básicos de propagación óptica en VLC y ecuaciones de potencia recibida}
+El modelo de canal óptico en VLC vehicular se basa principalmente en la ganancia DC ($H(0)$) y la atenuación por distancia. De acuerdo con \cite{ghassemlooy2019optical}, la potencia óptica recibida en un detector se define mediante la siguiente expresión:
+\begin{equation}
+P_r = P_t \cdot H(0)
+\label{eq:pr_optica}
+\end{equation}
+donde $P_t$ es la potencia transmitida y $H(0)$ es la ganancia del canal, que depende de la distancia $d$, el ángulo de radiación y el área efectiva del receptor \cite{georlette2020visible, kim2022ieee}.
+
+En escenarios de línea de vista (LoS, \textit{Line-of-Sight}), la ganancia sigue un modelo Lambertiano aproximado que caracteriza la distribución espacial de la luz. Según se detalla en \cite[pp. 5--7]{georlette2020visible}, la ganancia se expresa como:
+\begin{equation}
+H(0) = \frac{(m + 1) A_r}{2 \pi d^2} \cos^m(\phi) \cos(\psi), \quad 0 \le \psi \le \Psi_c
+\label{eq:ganancia_dc}
+\end{equation}
+donde $m$ es el orden de Lambert, $A_r$ es el área del receptor, y $\phi$ y $\psi$ son los ángulos de irradiancia e incidencia, respectivamente \cite{georlette2020visible}.
+
+\subsubsection{Parámetros de rendimiento clave (data rate, BER, SNR) en sistemas VLC vehiculares}
+Los parámetros de rendimiento más relevantes para la evaluación y simulación son la tasa de datos, la relación señal-ruido (SNR) y la tasa de error de bit (BER). La VLC alcanza tasas de datos de hasta 400 Mbps, muy superiores a los 27 Mbps típicos de DSRC \cite{georlette2020visible}. El SNR es crítico para mantener un BER aceptable; su degradación se produce principalmente por luz ambiente, distancia y condiciones meteorológicas. En pruebas experimentales con modulación OOK se logra BER $< 10^{-6}$ hasta 50 m, mientras que con OFDM y 64-QAM se mantiene BER $< 10^{-5}$ hasta 10 m en escenarios dinámicos \cite{solaija2023light}. Estos indicadores sirven de base para validar simulaciones en Python mediante métodos Monte Carlo o ecuaciones analíticas de BER.
+
+\subsection{Estándar IEEE 802.11bb y Arquitectura de Protocolos}
+El estándar IEEE 802.11bb-2023 \cite{ieee80211bb2023} define las especificaciones de la capa física (PHY) y las modificaciones necesarias en la capa de control de acceso al medio (MAC) para habilitar las comunicaciones por luz. A diferencia de otros estándares de VLC, el 802.11bb se basa en la arquitectura de redes inalámbricas de área local (WLAN, \textit{Wireless Local Area Network}), con el propósito de garantizar una integración transparente con el ecosistema Wi-Fi existente.
+
+La arquitectura de protocolos del estándar se organiza en una estructura de capas que separa las funciones lógicas de las funciones dependientes del medio físico. En el nivel superior, la capa MAC gestiona el direccionamiento, la seguridad y el acceso compartido al medio. Debajo de esta, la capa PHY se encarga de la transmisión de bits sobre el canal óptico. Como se detalla en la Cláusula 33 del estándar \cite[p. 19]{ieee80211bb2023}, esta implementación utiliza el modo de alta eficiencia (HE, \textit{High Efficiency}), heredado directamente del estándar IEEE 802.11ax, para maximizar el aprovechamiento del ancho de banda en entornos congestionados.
+
+El funcionamiento del transceptor opera bajo el principio de IM/DD. En este esquema, la información se transmite variando la potencia óptica instantánea de la fuente y el receptor detecta directamente esa variación mediante un fotodiodo, convirtiéndola en corriente eléctrica proporcional. Esta arquitectura es robusta y de bajo costo, pero impone restricciones técnicas críticas: dado que la intensidad de la luz no puede ser negativa ni compleja, la señal generada digitalmente debe someterse a procesos de transformación para asegurar que sea estrictamente real y no negativa antes de ser enviada al emisor \cite{ieee80211bb2023}.
+
+Esta base normativa permite que el estándar soporte diversas tasas de transferencia y niveles de robustez, adaptándose a las condiciones cambiantes del canal vehicular V2I mediante el uso de esquemas de modulación avanzados que se analizan en las secciones posteriores.
+
+\subsubsection{Evolución tecnológica desde el estándar IEEE 802.11ax hacia el IEEE 802.11bb}
+La evolución hacia el estándar \cite{ieee80211bb2023} representa un hito en las comunicaciones inalámbricas al trasladar la robustez de las redes inalámbricas de área local (WLAN) al dominio de la luz. Históricamente, las versiones previas de comunicaciones ópticas inalámbricas carecían de una estandarización que permitiera la interoperabilidad masiva. Sin embargo, el IEEE 802.11bb se diseñó como una enmienda que aprovecha la madurez del estándar IEEE 802.11ax, también conocido comercialmente como Wi-Fi 6.
+
+Esta evolución se basa en el uso del modo HE, el cual introduce mejoras significativas en la eficiencia del espectro mediante el acceso múltiple por división de frecuencias ortogonales (OFDMA, \textit{Orthogonal Frequency Division Multiple Access}). Mientras que el IEEE 802.11ax opera en las bandas de 2.4 GHz, 5 GHz y 6 GHz, el IEEE 802.11bb adapta estos mecanismos para operar en el espectro de la luz. Según se explica en el documento del estándar \cite[pp. 1--12]{ieee80211bb2023}, esta transición no requiere rediseñar la capa MAC, lo que permite que las mismas pilas de protocolos de red utilizadas en dispositivos convencionales puedan gestionar enlaces ópticos.
+
+La principal diferencia en esta evolución es la interfaz dependiente del medio físico. En el entorno vehicular, esta herencia tecnológica es crítica, ya que permite que los sistemas V2I utilicen las técnicas de gestión de colisiones y seguridad ya probadas en redes de radiofrecuencia, pero aplicadas a la infraestructura de iluminación. Como se analiza en el artículo \cite{feukeu2023enhancing}, esta compatibilidad con el ecosistema Wi-Fi facilita la integración de VLC como una capa de comunicación adicional sin necesidad de reemplazar la arquitectura de red existente en las ciudades inteligentes.
+
+\subsubsection{Modos de operación y niveles de soporte para alta eficiencia}
+El estándar \cite{ieee80211bb2023} es versátil porque permite la coexistencia de diferentes niveles de soporte físico, asegurando que los dispositivos puedan comunicarse según sus capacidades técnicas. Estos niveles se dividen principalmente en capacidades de rendimiento heredadas y capacidades de alta eficiencia. Mientras que los modos HT y VHT (\textit{Very High Throughput}) se centran en la compatibilidad con dispositivos de generaciones previas, el nivel de soporte HE es el pilar fundamental para las comunicaciones vehiculares modernas.
+
+Como se describe en el documento del estándar \cite[pp. 23--25]{ieee80211bb2023}, el modo HE permite la operación en canales de 20 MHz, lo cual es ideal para la simulación V2I. Este nivel de soporte utiliza un espaciamiento entre subportadoras más reducido y símbolos OFDM de mayor duración en comparación con los modos anteriores. Estas características técnicas proporcionan una mayor robustez frente al desvanecimiento del canal y a las interferencias externas, factores críticos cuando el vehículo se encuentra en movimiento.
+
+La elección del modo HE para este trabajo se justifica por su capacidad de gestionar el acceso múltiple de manera más ordenada. Según se detalla en \cite{feukeu2023enhancing}, el soporte para alta eficiencia permite que la infraestructura distribuya los recursos espectrales de forma óptima entre múltiples vehículos, reduciendo la latencia y mejorando la confiabilidad del enlace óptico en escenarios de tráfico denso.
+
+\subsubsection{Estructura de la capa de enlace de datos y formación de la unidad MPDU}
+La capa MAC es la responsable de organizar los datos del usuario en estructuras lógicas que puedan ser gestionadas por la red. La unidad fundamental en este nivel es la Unidad de Datos de Protocolo MAC (MPDU, \textit{MAC Protocol Data Unit}). Esta estructura no solo contiene la carga útil o datos de la aplicación, sino que añade información de control esencial para asegurar que el mensaje llegue a su destino correcto y sin errores.
+
+La formación de esta unidad sigue una jerarquía estricta definida para garantizar la integridad de la transmisión en entornos inalámbricos. En la Tabla \ref{tab:mpdu} se detallan las tres secciones principales que componen esta trama.
+
+\begin{table}[H]
+\centering
+\caption{Componentes de la Trama MPDU según el Estándar IEEE 802.11}
+\label{tab:mpdu}
+\begin{tabular}{|P{3.5cm}|P{10.5cm}|}
+\hline
+\textbf{Parte de la MPDU} & \textbf{Descripción y Funciones} \\ \hline
+Encabezado MAC & Contiene el control de trama, duración, direcciones de destino/origen y control de secuencia. \\ \hline
+Cuerpo de la Trama & Aloja la carga útil (\textit{payload}) con la información de la aplicación o capas superiores. \\ \hline
+Secuencia de Verificación (FCS) & Secuencia de verificación de trama mediante CRC de 32 bits para detección de errores. \\ \hline
+\end{tabular}
+\end{table}
+
+Según se especifica en el estándar \cite[pp. 19--21]{ieee80211bb2023}, el FCS utiliza un algoritmo de redundancia cíclica para que el receptor pueda detectar y descartar paquetes que hayan sufrido alteraciones debido al ruido del canal óptico. Un aspecto avanzado que hereda el estándar para mejorar la eficiencia es la agregación de tramas (A-MPDU). Esta técnica permite agrupar múltiples unidades MPDU en una sola transmisión física, lo que reduce el impacto del tiempo de espera entre tramas y maximiza el aprovechamiento del canal en escenarios de alta movilidad vehicular. Como se analiza en el artículo de Georlette \textit{et al.} \cite{georlette2020visible}, esta capacidad de la capa MAC es crítica para soportar aplicaciones de seguridad vial que requieren el envío constante de pequeños paquetes de datos con una sobrecarga mínima de señalización.
+
+\subsubsection{División funcional de la capa física en las subcapas PLCP y PMD}
+La capa física del estándar se divide en dos subcapas principales para separar las funciones lógicas de procesamiento de señal de las características del hardware óptico. Esta división permite que el protocolo sea flexible y pueda adaptarse a diferentes tipos de emisores y receptores sin alterar la lógica de comunicación superior. En la Tabla \ref{tab:capa_fisica_div} se presenta una síntesis de la jerarquía funcional de esta arquitectura \cite{ieee80211bb2023}.
+
+\begin{table}[H]
+\centering
+\caption{División Funcional de la Capa Física en el Estándar IEEE 802.11bb}
+\label{tab:capa_fisica_div}
+\begin{tabular}{|P{3.5cm}|P{4.5cm}|P{6.5cm}|}
+\hline
+\textbf{Subcapa} & \textbf{Función Principal} & \textbf{Descripción Técnica} \\ \hline
+PLCP & Convergencia lógica & Prepara la MPDU añadiendo preámbulos y gestiona el mapeo de símbolos OFDM. \\ \hline
+PMD & Interfaz con el medio & Realiza la modulación de intensidad (LED) y la detección directa (Fotodiodo). \\ \hline
+\end{tabular}
+\end{table}
+
+La subcapa de Procedimiento de Convergencia de la Capa Física (PLCP) funciona como un adaptador entre la capa MAC y el medio físico. Según se detalla en \cite{kim2022ieee}, la PLCP toma la MPDU y le añade un preámbulo y un encabezado físico para formar la PPDU. Como se explica en la Cláusula 33.2.1 del estándar \cite[p. 19]{ieee80211bb2023}, esta subcapa es la encargada de gestionar el mapeo de los bits en símbolos OFDM y de organizar la estructura de la trama que permite al receptor sincronizarse correctamente.
+
+Por su parte, la subcapa Dependiente del Medio Físico (PMD) es la responsable de la transmisión real de los bits sobre el canal. En el contexto de las comunicaciones por luz, la PMD define los parámetros del transceptor óptico, incluyendo la modulación de intensidad del LED y la detección mediante el fotodiodo. De acuerdo con el artículo \cite{feukeu2023enhancing}, la PMD garantiza que la señal eléctrica proveniente de la PLCP se convierta en pulsos de luz dentro del rango espectral de los 800 nm a 1000 nm, asegurando que la potencia óptica se mantenga dentro de los límites de seguridad y linealidad requeridos para el entorno vehicular.
+
+\subsubsection{Mecanismos de gestión del canal y evaluación de canal libre en el dominio óptico}
+La gestión del acceso al medio en el estándar se basa en la capacidad de la capa física para determinar si el canal óptico se encuentra disponible para la transmisión. Este proceso se denomina Evaluación de Canal Libre (CCA, \textit{Clear Channel Assessment}) y es fundamental para evitar colisiones en entornos donde múltiples vehículos e infraestructuras comparten el mismo medio. Según se describe en \cite[pp. 15--18]{solaija2023light}, el mecanismo CCA en las comunicaciones por luz opera mediante dos métodos principales de detección coordinados.
+
+El primer método es la detección de energía (ED), el cual consiste en medir el nivel de potencia óptica total presente en el fotodiodo. Según se especifica en el documento del estándar \cite[p. 26]{ieee80211bb2023}, si el nivel de energía detectado supera un umbral predefinido, el canal se reporta como ocupado. Este método es efectivo para identificar interferencias provenientes de fuentes de luz ajenas al sistema de comunicación o de otros transmisores VLC cercanos que operan en la misma banda espectral.
+
+El segundo método es la detección de portadora (CS), que implica la búsqueda y reconocimiento de un preámbulo válido de una trama IEEE 802.11bb. A diferencia de la detección de energía, la detección de portadora permite identificar específicamente si la actividad en el canal corresponde a una transmisión que sigue el protocolo. De acuerdo con lo analizado en el artículo \cite{feukeu2023enhancing}, la combinación de ED y CS garantiza que la capa MAC reciba una indicación precisa del estado del medio, permitiendo la implementación de protocolos de acceso de tipo CSMA/CA adaptados al espectro de luz para minimizar la latencia en el entorno vehicular.
+
+\subsection{Procesamiento de Señal y Arquitectura de Frecuencia Intermedia}
+El procesamiento de señal en el estándar \cite{ieee80211bb2023} constituye la etapa fundamental donde la información digital se transforma en una forma de onda apta para la transmisión a través del canal óptico. Debido a las propiedades intrínsecas de los dispositivos emisores de estado sólido (LEDs) y los fotodetectores, el sistema debe garantizar que la señal resultante cumpla con requisitos estrictos de positividad, linealidad y robustez frente al ruido.
+
+\subsubsection{Arquitectura de los procesos de transmisión y recepción en la capa física}
+El transceptor basado en el estándar \cite{ieee80211bb2023} opera mediante una arquitectura de procesamiento de señal donde cada etapa del transmisor posee una función inversa en el receptor para la recuperación de los datos. Esta estructura asegura que la unidad PPDU se adapte a las restricciones del canal óptico y sea procesada correctamente en el destino. En la Tabla \ref{tab:transmisor_bloques} se detallan los bloques funcionales presentes en la Figura 33-1 del estándar y el componente equivalente en la etapa de recepción.
+
+\begin{table}[H]
+\centering
+\caption{Bloques Funcionales del Procesamiento de Transmisión LC PHY}
+\label{tab:transmisor_bloques}
+\begin{tabular}{|P{4.5cm}|P{4.8cm}|P{4.8cm}|}
+\hline
+\textbf{Bloque IEEE 802.11bb} & \textbf{Bloque en TX} & \textbf{Equivalente en RX} \\ \hline
+FEC Encoder & Codificador FEC & FEC Decoder \\ \hline
+Interleaving + Mapping & Interleaving y Mapping & Deinterleaving + Demapping \\ \hline
+IDFT & IFFT & FFT \\ \hline
+Insert GI & Inserción de Intervalo de Guarda & GI Removal \\ \hline
+Window & Ventaneado & Sin equivalente directo \\ \hline
+I/Q Mod & Modulación I/Q & I/Q Demodulator \\ \hline
+DC bias & Polarización de corriente continua & DC Block \\ \hline
+TX OFE & Frente óptico de transmisión & RX OFE \\ \hline
+\end{tabular}
+\end{table}
+
+De igual manera, se fundamenta la integración de la arquitectura de frecuencia intermedia como una solución técnica para optimizar el rendimiento del enlace en escenarios de movilidad, asegurando la integridad de los datos frente a las perturbaciones del entorno vehicular.
+
+\subsubsection{Descripción detallada de los bloques funcionales del transceptor}
+En este apartado se describen los procesos técnicos que ejecutan los componentes de la capa física (PHY) del estándar IEEE 802.11bb, analizando su función en la adecuación de la señal para el canal vehicular.
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.1 FEC Encoder}\\[4pt]
+El bloque FEC Encoder (\textit{Forward Error Correction Encoder}) introduce redundancia estructural en la secuencia de bits de datos para permitir que el receptor detecte y corrija errores de bit sin requerir retransmisiones. Según el estándar \cite{ieee80211bb2023}, el sistema LC PHY utiliza códigos LDPC (\textit{Low-Density Parity-Check}). Estos códigos se basan en una matriz de comprobación de paridad dispersa que permite alcanzar tasas de transferencia cercanas al límite de Shannon con una complejidad de decodificación eficiente \cite{solaija2023light}.
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.2 Interleaving + Mapping}\\[4pt]
+Este bloque combina dos procesos críticos para la robustez y eficiencia del enlace. El \textit{Interleaving} reorganiza los bits codificados para dispersar los errores en ráfaga causados por obstrucciones o ruido impulsivo en el canal vehicular, transformándolos en errores aislados más fáciles de corregir por el FEC \cite{kim2022ieee}. Inmediatamente después, el \textit{Mapping} traduce estos bits en símbolos complejos utilizando modulaciones QAM (\textit{Quadrature Amplitude Modulation}). De acuerdo con la referencia \cite{ghassemlooy2019optical}, cada símbolo QAM se define por sus componentes en fase (I) y cuadratura (Q), representándose matemáticamente como:
+\begin{equation}
+s(t) = I \cdot \cos(2 \pi f_c t) - Q \cdot \sin(2 \pi f_c t)
+\label{eq:s_qam}
+\end{equation}
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.3 IDFT}\\[4pt]
+La IDFT (\textit{Inverse Discrete Fourier Transform}) es el proceso matemático que traslada los símbolos del dominio de la frecuencia al dominio del tiempo. En la práctica, este bloque se implementa mediante el algoritmo IFFT (\textit{Inverse Fast Fourier Transform}), el cual optimiza el cálculo computacional necesario para generar la señal multiportadora al reducir la complejidad de las operaciones de multiplicación y suma. Según se detalla en \cite{solaija2023light}, esta eficiencia algorítmica es fundamental para el procesamiento en tiempo real en los transceptores definidos por el estándar IEEE 802.11bb.
+
+Para que esta señal sea apta para el canal óptico, los datos se organizan mediante Simetría Hermitiana antes de ingresar a la IFFT. De acuerdo con la referencia \cite{ghassemlooy2019optical}, la señal de salida en el dominio del tiempo para un símbolo OFDM se define mediante la siguiente expresión:
+\begin{equation}
+x(n) = \frac{1}{N} \sum_{k=0}^{N-1} X(k) e^{j \frac{2 \pi k n}{N}}
+\label{eq:idft_sym}
+\end{equation}
+Donde $N$ es el número de subportadoras, $X(k)$ representa los símbolos de datos en el dominio de la frecuencia y $n$ es el índice de la muestra temporal. La configuración de los símbolos de entrada asegura que $x(n)$ sea una secuencia de valores reales, permitiendo que el sistema Li-Fi herede la robustez contra el desvanecimiento selectivo en frecuencia de los sistemas de radiofrecuencia, adaptándola a las restricciones de los emisores LED que solo responden a señales reales \cite{islim2017modulation}.
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.4 Insert GI}\\[4pt]
+El bloque Insert GI (\textit{Insert Guard Interval}) añade un intervalo de guarda a cada símbolo OFDM generado por la IFFT. Su función principal es mitigar la Interferencia Entre Símbolos (ISI), fenómeno que ocurre cuando las réplicas de un símbolo anterior, causadas por el esparcimiento por retardo del canal óptico (\textit{delay spread}), se solapan con el símbolo actual. Según se describe en la referencia \cite{solaija2023light}, este intervalo se implementa habitualmente mediante un Prefijo Cíclico (CP, \textit{Cyclic Prefix}), que consiste en copiar la sección final del símbolo OFDM y colocarla al inicio del mismo.
+
+De acuerdo con \cite{ghassemlooy2019optical}, para que el intervalo de guarda sea efectivo, su duración debe ser superior a la dispersión máxima del retardo del canal. Matemáticamente, si $x(n)$ es el símbolo original de longitud $N$, el símbolo con prefijo cíclico se expresa como:
+\begin{equation}
+x_{\text{cp}}(n) = \begin{cases}
+x(n + N - N_{\text{GI}}), & 0 \le n < N_{\text{GI}} \\
+x(n - N_{\text{GI}}), & N_{\text{GI}} \le n < N + N_{\text{GI}}
+\end{cases}
+\label{eq:cp_insert}
+\end{equation}
+Donde $N_{\text{GI}}$ es la longitud del intervalo de guarda en muestras. Esta técnica no solo elimina la ISI, sino que también convierte la convolución lineal del canal en una convolución circular, facilitando la ecualización en el receptor mediante un simple divisor en el dominio de la frecuencia \cite{islim2017modulation}. En el escenario vehicular, este bloque es decisivo para mantener la integridad del enlace ante las reflexiones de la señal en el asfalto u otros vehículos.
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.5 Window}\\[4pt]
+El bloque Window se aplica inmediatamente después de la inserción del intervalo de guarda. Su función técnica es el conformado de pulso en el dominio del tiempo para suavizar las transiciones entre símbolos OFDM consecutivos. De acuerdo con el estándar \cite{ieee80211bb2023}, esta operación reduce las discontinuidades abruptas en los bordes de los símbolos, lo que minimiza el ensanchamiento espectral y las emisiones fuera de banda (\textit{out-of-band emissions}).
+
+Según se detalla en la referencia \cite{ghassemlooy2019optical}, el ventaneado consiste en multiplicar el símbolo OFDM por una función de ventana (generalmente de tipo coseno alzado) que presenta flancos de subida y bajada suaves. Si $x_{\text{cp}}(n)$ es el símbolo con prefijo cíclico y $w(n)$ es la función de ventana, la señal resultante $x_w(n)$ se expresa como:
+\begin{equation}
+x_w(n) = x_{\text{cp}}(n) \cdot w(n)
+\label{eq:windowing}
+\end{equation}
+Este proceso es crítico en el entorno vehicular para cumplir con las regulaciones de compatibilidad electromagnética y asegurar que la modulación de intensidad del LED no interfiera con otros sistemas de comunicación o sensores cercanos. De acuerdo con \cite{kim2022ieee}, un ventaneado correctamente configurado mejora la eficiencia del espectro utilizado al concentrar la energía de la señal dentro del ancho de banda asignado para el canal óptico.
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.6 I/Q Mod.}\\[4pt]
+El bloque I/Q Mod. (\textit{In-phase and Quadrature Modulation}) realiza el desplazamiento de la señal desde la banda base hacia una frecuencia portadora específica dentro del espectro eléctrico. En el estándar \cite{ieee80211bb2023}, esta etapa es fundamental para la implementación de la arquitectura de Frecuencia Intermedia (FI). A diferencia de los sistemas de radiofrecuencia donde se modulan dos portadoras ortogonales para transmitir datos complejos, en este transceptor la modulación I/Q se utiliza para posicionar la señal real ya procesada en un rango de frecuencias que evite las interferencias de baja frecuencia.
+
+De acuerdo con la referencia \cite{ghassemlooy2019optical}, la señal modulada $s_{\text{IQ}}(t)$ se obtiene mediante el producto de la señal de banda base por una portadora de frecuencia intermedia, expresándose matemáticamente como:
+\begin{equation}
+s_{\text{IQ}}(t) = x_w(t) \cdot \cos(2 \pi f_{\text{IF}} t)
+\label{eq:sf_if}
+\end{equation}
+Donde $x_w(t)$ es la señal proveniente del bloque de ventaneado y $f_{\text{IF}}$ es la frecuencia intermedia. Según se detalla en \cite{islim2017modulation}, el uso de una FI permite alejar la información útil del ruido generado por las fuentes de iluminación artificial y las fluctuaciones de la red eléctrica (típicamente presentes por debajo de los 2 MHz). En el escenario vehicular, esta técnica asegura que la señal de datos sea más robusta frente al ruido de fondo ambiental antes de ser convertida en impulsos lumínicos.
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.7 DC bias}\\[4pt]
+El bloque DC bias (Polarización de Corriente Continua) es el encargado de transformar la señal bipolar proveniente de la modulación I/Q en una señal unipolar y estrictamente positiva. Dado que los LEDs son dispositivos que solo pueden ser conducidos por corriente en una sola dirección y su intensidad lumínica es proporcional a la amplitud de dicha corriente, este bloque añade un nivel de desplazamiento constante $B_{\text{DC}}$ a la señal alterna.
+
+De acuerdo con la referencia \cite{ghassemlooy2019optical}, la señal resultante $s_{\text{out}}(t)$ que se entregará al frente óptico se define mediante la siguiente expresión:
+\begin{equation}
+s_{\text{out}}(t) = s_{\text{IQ}}(t) + B_{\text{DC}}
+\label{eq:dc_bias}
+\end{equation}
+Según se explica en \cite{islim2017modulation}, el valor de $B_{\text{DC}}$ debe seleccionarse cuidadosamente para situar la señal dentro de la región lineal de la curva característica Corriente-Potencia (I-P) del LED. Un nivel de polarización adecuado evita el recorte de la señal (\textit{clipping}) en los picos negativos y la saturación en los picos positivos, lo cual es vital para minimizar la distorsión armónica en el canal vehicular. Este bloque completa la adaptación de la señal digital al dominio físico de la luz.
+
+\vspace{0.4cm}
+\noindent\textbf{1.4.3.2.8 TX OFE}\\[4pt]
+El bloque TX OFE (\textit{Transmit Optical Front-End} o Frente Óptico de Transmisión) constituye la interfaz física final del transceptor. Su función es convertir la señal eléctrica ya procesada y polarizada en variaciones de intensidad lumínica. Este bloque está compuesto principalmente por un circuito controlador (\textit{driver}) y el emisor de estado sólido, que en el contexto vehicular suele ser un LED (\textit{Light Emitting Diode}) de alta potencia integrado en los faros del vehículo.
+
+De acuerdo con la referencia \cite{ghassemlooy2019optical}, la relación entre la corriente eléctrica de entrada $i(t)$ y la potencia óptica radiada $P_{\text{opt}}(t)$ en la región lineal del dispositivo se describe mediante:
+\begin{equation}
+P_{\text{opt}}(t) = \eta \left[ i(t) - I_{\text{th}} \right]
+\label{eq:p_opt_conv}
+\end{equation}
+Donde $\eta$ representa la eficiencia de conversión del dispositivo e $I_{\text{th}}$ es la corriente de umbral necesaria para iniciar la emisión de luz. Según se detalla en \cite{kim2022ieee}, el diseño del TX OFE es crítico para el rendimiento del estándar IEEE 802.11bb, ya que debe poseer un ancho de banda lo suficientemente amplio para seguir las rápidas variaciones de la señal OFDM sin introducir desfases o atenuaciones excesivas que degraden el enlace de comunicación en escenarios de movilidad.
+
+\subsubsection{Justificación técnica para el uso de la arquitectura de Frecuencia Intermedia}
+La implementación de una Frecuencia Intermedia en el estándar IEEE 802.11bb responde a la necesidad de optimizar la relación señal a ruido (SNR) en el receptor. En los sistemas de comunicaciones por luz visible, el espectro cercano a la banda base (frecuencias bajas) se encuentra altamente contaminado por ruido \textit{shot} y térmico proveniente de fuentes de iluminación artificial, así como por interferencias electromagnéticas de la red eléctrica que opera a 60 Hz.
+
+Al desplazar la señal OFDM a una región del espectro radioeléctrico superior, generalmente por encima de los 2 MHz, se logra una separación efectiva de estos componentes de ruido. Según se establece en la referencia \cite{islim2017modulation}, esta técnica permite que los filtros del receptor operen de manera más eficiente, extrayendo la información útil con menor distorsión. En el canal vehicular, donde la luz solar y el alumbrado público introducen niveles variables de ruido de fondo, la arquitectura de FI asegura que la señal modulada mantenga su integridad antes de ser procesada por el fotodetector.
+
+Además, el uso de FI facilita el diseño del frente óptico, ya que permite trabajar en una banda de paso donde la respuesta en frecuencia del LED es más estable. De acuerdo con el estudio realizado en \cite{kim2022ieee}, esta estrategia de diseño es fundamental para soportar las altas tasas de transmisión que exige el estándar en escenarios de movilidad, evitando las zonas de mayor atenuación de los dispositivos emisores.
+
+\subsubsection{Planificación y mapeo de canales en el espectro de luz según el estándar}
+La planificación de canales en el estándar IEEE 802.11bb define cómo se segmenta el recurso espectral disponible para permitir la coexistencia de múltiples enlaces y usuarios. A diferencia de las bandas de radiofrecuencia de 2.4 GHz o 5 GHz, el espectro óptico utilizado por el estándar se organiza en canales que dependen del ancho de banda de modulación de los dispositivos emisores y de la frecuencia de muestreo del sistema.
+
+De acuerdo con la normativa \cite{ieee80211bb2023}, los canales se distribuyen para maximizar la tasa de transferencia de datos mientras se minimiza la interferencia entre canales adyacentes. El estándar define anchos de banda de canal específicos, típicamente de 20 MHz, 40 MHz o 80 MHz, similares a los utilizados en Wi-Fi convencional. Según se detalla en la referencia \cite{solaija2023light}, este mapeo permite que el protocolo de acceso al medio (MAC) gestione la asignación de recursos de manera dinámica, adaptándose a la demanda de tráfico y a la calidad del canal óptico en un instante dado.
+
+En el contexto de comunicaciones vehiculares, la planificación de canales es crucial para evitar colisiones de datos cuando varios vehículos interactúan en una misma zona de cobertura. Según la referencia \cite{kim2022ieee}, el mapeo de canales en el espectro de luz debe considerar la superposición de las áreas de iluminación de los faros para asegurar que el sistema pueda distinguir entre señales provenientes de distintas fuentes mediante técnicas de multiplexación en el dominio de la frecuencia.
+
+\subsubsection{Configuración SISO para la validación de enlaces vehiculares robustos}
+La configuración SISO (\textit{Single-Input Single-Output}) representa el modelo básico de enlace donde se utiliza un único emisor óptico y un único receptor. Esta arquitectura es el punto de partida para la validación experimental y por simulación de los sistemas VLC vehiculares debido a su simplicidad analítica y facilidad de implementación en el modelado de la capa física.
+
+De acuerdo con la referencia \cite{ghassemlooy2019optical}, en un enlace SISO, la señal recibida en el dominio del tiempo $y(t)$ se describe mediante la convolución de la señal transmitida $s(t)$ con la respuesta al impulso del canal $h(t)$, sumada al ruido aditivo del sistema $n(t)$:
+\begin{equation}
+y(t) = s(t) * h(t) + n(t)
+\label{eq:y_siso}
+\end{equation}
+
+Según se detalla en \cite{islim2017modulation}, a pesar de ser la configuración más sencilla, el modelo SISO permite caracterizar con precisión parámetros fundamentales como la tasa de error de bit (BER) y la relación señal a ruido (SNR) en función de la distancia y el ángulo de incidencia. En esta tesis, la configuración SISO se emplea como escenario de referencia para validar la robustez de la arquitectura de frecuencia intermedia frente a las perturbaciones dinámicas del entorno vehicular antes de considerar arreglos más complejos.
+
+\subsection{El Frente Óptico y el Canal en Entornos Exteriores}
+El frente óptico constituye la interfaz física entre el procesamiento de señal electrónico y el medio de propagación. En las comunicaciones vehiculares exteriores, este bloque es el más expuesto a las condiciones dinámicas del entorno y a las fuentes de interferencia natural. Esta sección describe las características del hardware emisor y receptor, así como los fenómenos físicos que rigen el comportamiento del canal en escenarios de movilidad V2I bajo el estándar \cite{feukeu2023enhancing}.
+
+\subsubsection{Características de los emisores LED frente a la responsividad de los fotodiodos}
+El rendimiento del enlace depende de la compatibilidad entre la potencia de emisión y la sensibilidad de detección. Los LEDs utilizados en la infraestructura vial están diseñados para iluminación, lo que implica una respuesta en frecuencia limitada que actúa como un filtro pasabajos sobre la señal modulada. Según se explica en el estudio \cite{islim2017modulation}, es necesario caracterizar el ancho de banda de modulación del dispositivo emisor para evitar la distorsión de las subportadoras de alta frecuencia de la señal OFDM.
+
+En el extremo opuesto, la responsividad del fotodiodo determina la eficiencia con la que la potencia óptica se convierte en corriente eléctrica. Esta relación varía según la longitud de onda, siendo crítica en el rango de los 800 nm a 1000 nm especificado por el estándar para evitar interferencias en el espectro visible. La selección de un detector con una alta responsividad espectral en el infrarrojo cercano permite maximizar la SNR sin comprometer la seguridad visual de los conductores \cite{ghassemlooy2019optical}.
+
+\subsubsection{Modelado del punto de operación (DC Bias) y filtrado de componente continua (DC Block)}
+Para que un LED pueda transmitir señales polares como las de OFDM, es indispensable aplicar una corriente de polarización constante conocida como DC Bias. Este proceso desplaza la señal alterna a una región de operación positiva, asegurando que la intensidad luminosa nunca sea negativa. Sin embargo, como se analiza en \cite{islim2017modulation}, un punto de operación mal calculado puede llevar al LED a regiones de saturación o de no linealidad, lo que genera distorsión por recorte (\textit{clipping}) y aumenta la tasa de error de bit.
+
+En el receptor, esta componente de corriente continua debe ser eliminada mediante un circuito de filtrado o DC Block para recuperar únicamente la señal de datos. Según se detalla en \cite[pp. 1--5]{georlette2020visible}, este filtrado es vital no solo para remover el bias del transmisor, sino también para mitigar la interferencia de fuentes de luz ambiental constantes, como el sol o el alumbrado público estático, que podrían saturar los amplificadores de transimpedancia del receptor.
+
+\subsection{Esquemas de Modulación y Codificación (MCS) en IEEE 802.11bb}
+El estándar IEEE 802.11bb hereda la estructura de tasas del modo HE (High Efficiency), definiendo 12 combinaciones de esquemas de modulación y tasas de codificación, denominados MCS 0 a MCS 11. Cada MCS representa un compromiso entre la eficiencia espectral (velocidad de transmisión) y la robustez frente al ruido del canal. 
+
+Para un ancho de banda de canal de 20 MHz con 1024 subportadoras FFT ($N_{\text{fft}} = 1024$), del cual $N_{\text{active}} = 234$ son subportadoras activas de datos, y una frecuencia de muestreo de $f_s = 80$ MHz, la velocidad bruta de transmisión nominal de la capa física ($R_{\text{raw}}$) en Mbps se calcula mediante la relación matemática:
+\begin{equation}
+R_{\text{raw}} = \frac{N_{\text{active}} \cdot \log_2(M) \cdot R_c}{T_{\text{symbol}}}
+\label{eq:phy_rate_calc}
+\end{equation}
+donde $M$ es el orden de la modulación QAM, $R_c$ es la tasa del código corrector de errores FEC, y $T_{\text{symbol}} = (N_{\text{fft}} + N_{\text{CP}}) / f_s$ es la duración total del símbolo OFDM, la cual depende del Intervalo de Guarda (GI). En la Tabla \ref{tab:mcs_velocidades_bb} se detallan las 36 velocidades de transmisión física nominales que componen las combinaciones oficiales del estándar.
+
+\begin{table}[H]
+\centering
+\caption{Velocidades Nominales de Transmisión en la Capa Física del Estándar IEEE 802.11bb (Canal de 20 MHz, $f_s = 80$ MHz, 234 Portadoras de Datos)}
+\label{tab:mcs_velocidades_bb}
+\begin{tabular}{|P{1.5cm}|P{2.2cm}|P{1.8cm}|P{1.5cm}|P{2.2cm}|P{2.2cm}|P{2.2cm}|}
+\hline
+\textbf{MCS} & \textbf{Modulación} & \textbf{Bits/Símbolo} & \textbf{Tasa $R_c$} & \textbf{GI 0.8 µs (Mbps)} & \textbf{GI 1.6 µs (Mbps)} & \textbf{GI 3.2 µs (Mbps)} \\ \hline
+MCS 0 & BPSK & 1 & 1/2 & 8.6029 & 8.1250 & 7.3125 \\ \hline
+MCS 1 & QPSK & 2 & 1/2 & 17.2059 & 16.2500 & 14.6250 \\ \hline
+MCS 2 & QPSK & 2 & 3/4 & 25.8088 & 24.3750 & 21.9375 \\ \hline
+MCS 3 & 16-QAM & 4 & 1/2 & 34.4118 & 32.5000 & 29.2500 \\ \hline
+MCS 4 & 16-QAM & 4 & 3/4 & 51.6176 & 48.7500 & 43.8750 \\ \hline
+MCS 5 & 64-QAM & 6 & 2/3 & 68.8235 & 65.0000 & 58.5000 \\ \hline
+MCS 6 & 64-QAM & 6 & 3/4 & 77.4265 & 73.1250 & 65.8125 \\ \hline
+MCS 7 & 64-QAM & 6 & 5/6 & 86.0294 & 81.2500 & 73.1250 \\ \hline
+MCS 8 & 256-QAM & 8 & 3/4 & 103.2353 & 97.5000 & 87.7500 \\ \hline
+MCS 9 & 256-QAM & 8 & 5/6 & 114.7059 & 108.3333 & 97.5000 \\ \hline
+MCS 10 & 1024-QAM & 10 & 3/4 & 129.0441 & 121.8750 & 109.6875 \\ \hline
+MCS 11 & 1024-QAM & 10 & 5/6 & 143.3824 & 135.4167 & 121.8750 \\ \hline
+\end{tabular}
+\end{table}

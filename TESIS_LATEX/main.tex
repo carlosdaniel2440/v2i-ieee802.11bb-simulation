@@ -1,0 +1,88 @@
+\documentclass[11pt, a4paper]{report}
+
+% --- PAQUETES DE FORMATO Y TIPOGRAFÍA ---
+\usepackage[top=3.0cm, bottom=2.5cm, left=3.0cm, right=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+
+% Tipografía Arial / Helvetica
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Espaciado de 1.5 para el documento general
+\usepackage{setspace}
+\onehalfspacing
+
+% Paquetes de matemáticas y símbolos
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+% Paquetes de figuras y tablas
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{array}
+
+% Configuración del formato de captions de tablas y figuras
+\usepackage{caption}
+\captionsetup[table]{labelsep=period, labelfont=bf, textfont=normal, justification=centering}
+\captionsetup[figure]{labelsep=period, labelfont=bf, textfont=normal, justification=centering}
+
+% Definición de columna centrada con ajuste de ancho automático
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+
+% Personalización de títulos de capítulos y secciones
+\usepackage{titlesec}
+\titleformat{\chapter}[block]{\fontsize{16}{19}\bfseries\sffamily\MakeUppercase}{\thechapter\quad}{0pt}{}
+\titleformat{\section}{\fontsize{14}{17}\bfseries\sffamily\MakeUppercase}{\thesection}{1em}{}
+\titleformat{\subsection}{\fontsize{12}{15}\bfseries\sffamily\MakeUppercase}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\fontsize{12}{15}\bfseries\sffamily}{\thesubsubsection}{1em}{}
+
+% Activar numeración hasta subsubsecciones (Nivel 4)
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+% Ajustar espaciado de títulos
+\titlespacing*{\chapter}{0pt}{0pt}{18pt}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\subsubsection}{0pt}{12pt}{6pt}
+
+% Configuración de numeración de páginas (Inferior Centro)
+\pagestyle{plain}
+
+% Enlaces y referencias cruzadas
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    filecolor=black,
+    urlcolor=black
+}
+
+\begin{document}
+
+% --- PÁGINAS PRELIMINARES ---
+\include{preliminares}
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% --- CAPÍTULOS DE LA TESIS ---
+\include{cap1}
+\include{cap2}
+\include{cap3}
+
+% --- REFERENCIAS BIBLIOGRÁFICAS ---
+\clearpage
+\addcontentsline{toc}{chapter}{REFERENCIAS BIBLIOGRÁFICAS}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+% --- ANEXOS ---
+\include{anexos}
+
+\end{document}

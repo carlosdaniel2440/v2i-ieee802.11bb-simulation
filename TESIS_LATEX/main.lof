@@ -1,0 +1,12 @@
+\babel@toc {spanish}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Diagrama esquemático de la geometría del enlace óptico vehicular V2I (uplink) con emisor LED inclinado y fotodetector horizontal.}}{23}{figure.caption.9}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Procesamiento paso a paso de las señales y diagramas de constelación del transceptor en un canal óptico de línea de vista (LOS) ideal a una distancia de 3.0 m, en ausencia de ruido solar de fondo ($E_{\text {sol}} = 0\text { W/m}^2$) y con un ruido térmico mínimo ($\sigma ^2_{\text {thermal}} = 10^{-15}\text { A}^2$). Se observa la constelación 16-QAM recibida perfectamente ecualizada, logrando una tasa de error de bit de BER = 0.0.}}{30}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Procesamiento paso a paso de las señales y diagramas de constelación del transceptor operando bajo ruido solar de fondo severo continuo a mediodía ($E_{\text {sol}} = 150\text { W/m}^2$) a una distancia de 3.0 m. La alta corriente de fondo genera un intenso ruido de disparo que distorsiona la constelación 16-QAM ecualizada en el receptor, produciendo una tasa de error de bit no nula.}}{31}{figure.caption.12}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Curvas de BER vs. SNR eléctrica teórica en canal AWGN ideal para todos los doce esquemas MCS (del MCS 0 al MCS 11) definidos en el estándar IEEE 802.11bb.}}{32}{figure.caption.13}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Tasa de Error de Bit (BER) y Throughput efectivo en función de la distancia de propagación en enlace horizontal alineado para los cuatro escenarios climáticos.}}{34}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Tasa de Error de Bit (BER) vs. SNR Eléctrica (dB) organizada en una matriz de $4\times 3$ (filas: escenarios ambientales, columnas: Intervalos de Guarda).}}{36}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Tasa de Error de Bit (BER) vs. Distancia Horizontal (m) en configuración V2I elevada hasta 50 metros.}}{38}{figure.caption.16}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Throughput Efectivo (Mbps) vs. Distancia Horizontal (m) en entorno vehicular V2I con barrido hasta 50 metros.}}{40}{figure.caption.17}%

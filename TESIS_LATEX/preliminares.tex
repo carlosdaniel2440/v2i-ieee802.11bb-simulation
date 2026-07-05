@@ -1,0 +1,153 @@
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+    \singlespacing
+    
+    {\fontsize{24}{28}\bfseries\sffamily ESCUELA POLITÉCNICA NACIONAL}\\[2.0cm]
+    
+    {\fontsize{16}{20}\bfseries\sffamily FACULTAD DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA}\\[1.5cm]
+    
+    {\fontsize{14}{18}\bfseries\sffamily Diseño, simulación y prototipado de comunicaciones vehiculares basadas en luz visible (VLC)}\\[2.0cm]
+    
+    {\fontsize{12}{15}\bfseries\sffamily TRABAJO DE INTEGRACIÓN CURRICULAR PRESENTADO COMO REQUISITO PARA LA OBTENCIÓN DEL TÍTULO DE INGENIERO EN TELECOMUNICACIONES}\\[2.5cm]
+    
+    {\fontsize{12}{15}\bfseries\sffamily CARLOS  DANIEL CACUANGO COLLAGUAZO}\\
+    {\fontsize{12}{15}\sffamily carlos.cacuango@epn.edu.ec}\\[2.0cm]
+    
+    {\fontsize{12}{15}\bfseries\sffamily DIRECTOR: DRA. MARTHA CECILIA PAREDES PAREDES }\\
+    {\fontsize{12}{15}\sffamily cecilia.paredes@epn.edu.ec}\\[2.5cm]
+    
+    {\fontsize{12}{15}\bfseries\sffamily Quito, julio 2026}
+\end{titlepage}
+
+\clearpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+% --- CERTIFICACIONES ---
+\begin{center}
+    {\fontsize{14}{17}\bfseries\sffamily CERTIFICACIONES}
+\end{center}
+\vspace{1.0cm}
+
+\noindent Yo, \textbf{Carlos Daniel Cacuango Cacuango}, declaro que el trabajo de integración curricular aquí descrito es de mi autoría; que no ha sido previamente presentado para ningún grado o calificación profesional; y, que he consultado las referencias bibliográficas que se incluyen en este documento.
+
+\vspace{0.5cm}
+\noindent De igual manera, declaro que he utilizado la herramienta de inteligencia artificial Antigravity únicamente como apoyo en la reestructuración y optimización de código, sin atribuirle autoría, y que todo el contenido derivado ha sido revisado, validado y es de mi exclusiva responsabilidad.
+
+\vspace{1.5cm}
+\begin{flushright}
+    \begin{minipage}{7cm}
+        \centering
+        \vspace{1.5cm}
+        \hrule
+        \vspace{0.2cm}
+        Carlos Daniel Cacuango Cacuango\\
+        C.I.: 1756170641
+    \end{minipage}
+\end{flushright}
+
+\vspace{2.0cm}
+\noindent Certifico que el presente trabajo de integración curricular fue desarrollado por \textbf{Carlos Daniel Cacuango Cacuango}, bajo mi supervisión.
+
+\vspace{1.5cm}
+\begin{flushright}
+    \begin{minipage}{7cm}
+        \centering
+        \vspace{1.5cm}
+        \hrule
+        \vspace{0.2cm}
+        Ing. Director, M.Sc.\\
+        \textbf{DIRECTOR DEL TRABAJO}
+    \end{minipage}
+\end{flushright}
+
+\clearpage
+
+% --- DECLARACIÓN DE AUTORÍA ---
+\begin{center}
+    {\fontsize{14}{17}\bfseries\sffamily DECLARACIÓN DE AUTORÍA}
+\end{center}
+\vspace{1.0cm}
+
+\noindent A través de la presente declaración, afirmamos que el trabajo de integración curricular aquí descrito, así como el (los) producto(s) resultante(s) del mismo, son públicos y estarán a disposición de la comunidad a través del repositorio institucional de la Escuela Politécnica Nacional; sin embargo, la titularidad de los derechos patrimoniales nos corresponde a los autores que hemos contribuido en el desarrollo del presente trabajo; observando para el efecto las disposiciones establecidas por el órgano competente en propiedad intelectual, la normativa interna y demás normas.
+
+\vspace{2.5cm}
+\begin{flushleft}
+    \begin{minipage}{7cm}
+        \centering
+        \hrule
+        \vspace{0.2cm}
+        Carlos Daniel Cacuango Cacuango\\
+        \textbf{Autor}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{7cm}
+        \centering
+        \hrule
+        \vspace{0.2cm}
+        Dra. Martha Cecilia Paredes Paredes.\\
+        \textbf{Director}
+    \end{minipage}
+\end{flushleft}
+
+\clearpage
+
+% --- DEDICATORIA ---
+\begin{center}
+    {\fontsize{14}{17}\bfseries\sffamily DEDICATORIA}
+\end{center}
+\vspace{2.0cm}
+
+\begin{flushright}
+    \begin{minipage}{10cm}
+        \itshape
+        [A RH]
+    \end{minipage}
+\end{flushright}
+
+\clearpage
+
+% --- AGRADECIMIENTO ---
+\begin{center}
+    {\fontsize{14}{17}\bfseries\sffamily AGRADECIMIENTO}
+\end{center}
+\vspace{1.0cm}
+
+\noindent [...]
+
+\clearpage
+
+% --- ÍNDICES ---
+\tableofcontents
+\clearpage
+
+\listoffigures
+\clearpage
+
+\listoftables
+\clearpage
+
+% --- RESUMEN ---
+\begin{center}
+    {\fontsize{14}{17}\bfseries\sffamily RESUMEN}
+\end{center}
+\vspace{0.5cm}
+
+\noindent El presente trabajo de integración curricular describe y evalúa la simulación a nivel físico de un transceptor óptico multiportadora basado en el estándar IEEE 802.11bb-2023 para comunicaciones por luz visible (VLC) en entornos vehiculares del tipo Vehículo a Infraestructura (V2I). Se detalla la implementación modular en Python de la cadena completa de procesamiento de señal del transceptor DCO-OFDM. Esta cadena incluye codificación convolucional FEC con punzado adaptativo, entrelazado de bloques, mapeo de símbolos en constelaciones Gray desde BPSK hasta 1024-QAM, simetría hermitiana para generación de señales reales mediante IFFT, inserción de prefijo cíclico, ventaneado de coseno alzado, modulación de frecuencia intermedia a 20 MHz para evitar ruidos ambientales en baja frecuencia, polarización DC adaptativa y el modelado del recorte por no linealidad del LED. El canal de propagación se modela de forma determinista para escenarios de línea de vista directa (LOS) bajo la atenuación de Beer-Lambert por factores climáticos de lluvia y neblina, así como el ruido térmico y el ruido de disparo originado por la luz solar de fondo. Las validaciones estadísticas mediante simulación de Monte Carlo con 10,000 iteraciones demuestran la robustez de la arquitectura en términos de tasa de error de bit (BER) y tasa de datos efectiva (Throughput) para todos los MCS, confirmando la viabilidad de la comunicación LiFi de alta velocidad para semáforos inteligentes en entornos urbanos dinámicos.
+
+\vspace{1.0cm}
+\noindent \textbf{PALABRAS CLAVE:} COMUNICACIÓN POR LUZ VISIBLE, LIFI, IEEE 802.11bb, SIMULACIÓN MONTE CARLO, DCO-OFDM, CANAL VEHICULAR V2I.
+
+\clearpage
+
+% --- ABSTRACT ---
+\begin{center}
+    {\fontsize{14}{17}\bfseries\sffamily ABSTRACT}
+\end{center}
+\vspace{0.5cm}
+
+\noindent This curriculum integration work describes and evaluates the physical layer simulation of a multi-carrier optical transceiver based on the IEEE 802.11bb-2023 standard for visible light communications (VLC) in Vehicle-to-Infrastructure (V2I) vehicular environments. The modular implementation in Python of the complete DCO-OFDM transceiver signal processing chain is detailed. This chain includes FEC convolutional coding with adaptive puncturing, block interleaving, mapping of symbols in Gray constellations from BPSK to 1024-QAM, hermitian symmetry to generate real-valued signals using IFFT, cyclic prefix insertion, raised cosine windowing, intermediate frequency modulation at 20 MHz to avoid low-frequency ambient noise, adaptive DC bias, and LED non-linear clipping modeling. The propagation channel is deterministically modeled for direct Line-of-Sight (LOS) links under Beer-Lambert attenuation due to rainfall and fog weather factors, as well as thermal noise and shot noise originated by background solar irradiance. Statistical validations through Monte Carlo simulations with 10,000 iterations demonstrate the robustness of the architecture in terms of bit error rate (BER) and effective throughput for all MCS, confirming the feasibility of high-speed LiFi communication for smart traffic lights in dynamic urban settings.
+
+\vspace{1.0cm}
+\noindent \textbf{KEYWORDS:} VISIBLE LIGHT COMMUNICATION, LIFI, IEEE 802.11bb, MONTE CARLO SIMULATION, DCO-OFDM, V2I VEHICULAR CHANNEL.
