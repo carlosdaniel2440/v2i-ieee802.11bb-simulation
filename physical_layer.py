@@ -1,5 +1,5 @@
 """
-lifi_phy.py
+physical_layer.py
 Simulación modular de la capa física (PHY) bajo el estándar IEEE 802.11bb (Light Communications).
 Implementa OFDM con simetría hermitiana (DCO-OFDM), modulación a Frecuencia Intermedia (FI),
 canal óptico Lambertiano, y decodificación con algoritmo de Viterbi.
@@ -166,7 +166,7 @@ def constellation_mapping(bits: np.ndarray, scheme: str = "QPSK") -> np.ndarray:
 
 def apply_hermitian_symmetry(complex_symbols: np.ndarray, fft_size: int = 256, active_carriers: list = None) -> np.ndarray:
     """
-    Aplica Simetría Hermitiana a los símbolos complejos para OFDM en LiFi (DCO-OFDM).
+    Aplica Simetría Hermitiana a los símbolos complejos para OFDM en Light Communications (LC) (DCO-OFDM).
     Subportadoras activas de datos: por defecto 6 a 30 (ajustadas para 80 MHz fs, 20 MHz f_if).
     Subportadoras de guarda: 0 (DC), 1-5 (Guardas DC), Nyquist, y equivalentes conjugados.
     Retorna una matriz de forma (num_ofdm_symbols, fft_size) que entrará a la IFFT.

@@ -1,25 +1,23 @@
 \chapter{METODOLOGÍA}
 
-\section{Enfoque y Diseño de la Investigación}
-El desarrollo del presente componente se fundamenta en un método de investigación de enfoque cuantitativo y tipo experimental. Es de enfoque cuantitativo porque se basa en la modelación matemática, recolección y análisis estadístico de variables físicas medibles del canal óptico, tales como la Relación Señal a Ruido (SNR) eléctrica instantánea y la Tasa de Error de Bit (BER) para validar y cuantificar el desempeño de la capa física en el enlace óptico. 
+\section{ENFOQUE Y DISEÑO DE LA INVESTIGACIÓN}
+El presente trabajo de investigación se basa en un enfoque cuantitativo de tipo experimental computacional. Se implementa un simulador de la capa física del estándar IEEE 802.11bb en el lenguaje de programación Python, modelando de manera integrada las etapas de un sistema transmisor-receptor óptico y un canal de propagación inalámbrico para un enlace de tipo Vehículo a Infraestructura (V2I).
 
-De igual manera, representa un trabajo experimental y explicativo computacional. Es experimental debido a que se manipulan variables de control específicas en los scripts de simulación (como la distancia entre el transmisor y el receptor, la tasa de irradiancia solar de fondo, los coeficientes de extinción atmosférica y los esquemas de modulación desde BPSK hasta 1024-QAM) para observar de forma controlada su impacto sobre la tasa de transmisión útil. Es explicativo ya que busca determinar las causas físicas y los mecanismos específicos de la degradación y atenuación de la luz visible en enlaces vehiculares del tipo Vehículo a Infraestructura (V2I).
+La arquitectura del simulador está estructurada de forma modular en bloques de procesamiento digital y analógico secuenciales. La integración funcional de estos bloques permite evaluar el comportamiento de la señal desde la generación de datos binarios hasta su reconstrucción final en el receptor. Para caracterizar el rendimiento de la comunicación bajo condiciones exteriores realistas expuestas al ruido solar y a la atenuación meteorológica, se utiliza la simulación estocástica por el método de Monte Carlo, estimando de forma empírica la Tasa de Error de Bit (BER) y la velocidad de transmisión efectiva (\textit{Throughput}) en función del barrido de la distancia geométrica del enlace.
 
-La recolección de información inicial se fundamenta en un análisis documental técnico de la literatura especializada \cite{feukeu2023enhancing, georlette2020visible, ieee80211bb2023, kim2022ieee, solaija2023light} para extraer los parámetros de modelado físico del canal. Posteriormente, se realiza la generación de datos sintéticos mediante la ejecución del simulador desarrollado.
 
-\section{Arquitectura General del Transceptor LiFi (IEEE 802.11bb)}
-La simulación de la capa física se alinea con los requerimientos técnicos descritos en el estándar IEEE 802.11bb-2023, específicamente en su Cláusula 33 orientada a las Comunicaciones por Luz Visible (LC). Para cumplir con las características físicas de los dispositivos emisores y detectores de luz artificial, el sistema de comunicación propuesto opera bajo el principio de Modulación por Intensidad y Detección Directa (IM/DD). En este esquema, la información no se codifica en la amplitud de la onda electromagnética portadora o su fase coherente, sino en las fluctuaciones rápidas de la potencia óptica instantánea radiada por el diodo LED del emisor, la cual es leída en el receptor como una fotocorriente analógica proporcional generada en la zona activa del fotodetector.
+\section{ARQUITECTURA GENERAL DEL TRANSMISOR Y RECEPTOR LC (IEEE 802.11BB)}
+La arquitectura del sistema de comunicación implementado se basa en una estructura simétrica de procesamiento que sigue los lineamientos de la capa física (LC PHY). Las etapas del procesamiento de señal digital y analógica que componen el transmisor y el receptor de este simulador se ilustran detalladamente en el diagrama de bloques del transmisor (Fig. \ref{fig:transmisor_bloques}) y del receptor (Fig. \ref{fig:receptor_bloques}) descritos en el Capítulo 1, los cuales delimitan la integración funcional de todo el sistema.
 
-Dado que la intensidad de la luz no puede adoptar valores negativos ni complejos, la señal modulada digitalmente debe someterse a procesos de transformación para asegurar que sea estrictamente real y no negativa antes de ser enviada al emisor óptico. Para ello, el transmisor implementa un procesamiento multiportadora DCO-OFDM (\textit{Direct Current Optical Orthogonal Frequency Division Multiplexing}) apoyado en la aplicación de la simetría hermitiana en el dominio de la frecuencia y la posterior inserción de una corriente de polarización constante (DC Bias) en el dominio del tiempo. En el receptor, tras la conversión óptico-eléctrica y el bloqueo de la componente continua (DC block), se realiza la demodulación y ecualización de canal en frecuencia para recuperar la trama de bits de información original.
+\section{DISEÑO E IMPLEMENTACIÓN DEL TRANSMISOR (TX) ÓPTICO}
+Para materializar la arquitectura de la capa física del estándar IEEE 802.11bb, se realiza una implementación modular en el lenguaje de programación Python. En esta sección se describe la estructura del bloque transmisor (Tx) óptico y su relación directa con el procesamiento en el bloque receptor (Rx). En la Tabla \ref{tab:bloques} se presenta la correspondencia detallada entre cada uno de los bloques lógicos definidos por la normativa y las funciones de software desarrolladas para la simulación. Como se observa en dicha tabla, para cada etapa de procesamiento de la señal en el transmisor se programa una función específica en la biblioteca \texttt{physical\_layer.py}. De igual manera, se muestra la correspondencia con las funciones receptoras equivalentes, las cuales están encargadas de realizar el procesamiento inverso para recuperar la información transmitida. A continuación, se detallan los principios de diseño y la lógica de implementación de cada uno de los módulos que conforman el transmisor óptico, presentados en el orden secuencial de la cadena de transmisión.
 
-\section{Diseño e Implementación del Transmisor (TX) Óptico}
-El procesamiento del transmisor en la capa física (PHY) toma la secuencia binaria de datos proveniente de la capa MAC y realiza una serie de operaciones modulares implementadas en el script \texttt{lifi\_phy.py} para adecuar la señal al canal. Los bloques funcionales se detallan a continuación y se mapean con respecto a la arquitectura del estándar en la Tabla \ref{tab:bloques}.
 
 \begin{table}[H]
 \centering
-\caption{Mapeo de Bloques del Estándar IEEE 802.11bb a la Implementación del Transceptor}
+\caption{Correspondencia de Bloques del Estándar IEEE 802.11bb a la Implementación del Transmisor y Receptor}
 \label{tab:bloques}
-\begin{tabular}{|P{4.5cm}|P{4.8cm}|P{5cm}|}
+\begin{tabular}{|p{4.5cm}|p{4.8cm}|p{5cm}|}
 \hline
 \textbf{Bloque IEEE 802.11bb} & \textbf{Función en TX (Python)} & \textbf{Función en RX (Python)} \\ \hline
 FEC Encoder (Tasa 1/2) & \texttt{fec\_encoder()} & \texttt{fec\_decoder()} (Viterbi con Erasures) \\ \hline
@@ -35,248 +33,228 @@ FEQ & Sin equivalente directo & Ecualización de un toque (Single-Tap FEQ) \\ \h
 \end{tabular}
 \end{table}
 
-\subsection{Codificador de Canal (FEC)}
-El bloque FEC (\textit{Forward Error Correction}) introduce redundancia estructural y controlada en la secuencia de bits de entrada mediante un codificador convolucional implementado en la función \texttt{fec\_encoder()}. Esta etapa utiliza una tasa de codificación convolucional base $R_c = 1/2$ y una longitud de restricción $K = 3$. Los polinomios generadores del codificador en formato octal se definen como $G_0 = 7$ ($111$ en binario) y $G_1 = 5$ ($101$ en binario), lo que permite que por cada bit de información de entrada se generen dos bits codificados de salida, duplicando el flujo de datos.
+\subsection{FEC ENCODER (CODIFICADOR DE CANAL)}
+El bloque FEC (\textit{Forward Error Correction}) introduce redundancia estructural y controlada en la secuencia de bits de entrada mediante un codificador convolucional implementado en la función \texttt{fec\_encoder()}. Esta etapa utiliza una tasa de codificación convolucional base $R_c = 1/2$ y una longitud de restricción $K = 3$. Los polinomios generadores del codificador en formato octal se definen como $G_0 = 7$ ($111$ en binario) y $G_1 = 5$ ($101$ en binario), lo que permite que por cada bit de información de entrada se generen dos bits codificados de salida, duplicando el flujo de datos. Cabe recalcar que, aunque el estándar IEEE 802.11 define una longitud de restricción $K=7$ para su codificador convolucional legado, en este trabajo se opta por una longitud de restricción simplificada de $K=3$ con fines de viabilidad computacional. Esto reduce los estados de trellis de $64$ a $4$ en la decodificación de Viterbi, disminuyendo los tiempos de simulación en Python por un factor de 16 sin alterar los principios de modelado de la corrección de errores ni la estructura de las máquinas de punzado.
 
-\subsection{Bloque de Punzado (Puncturing)}
+\textbf{Entrada:} vector de bits de información de longitud $N_{\text{bits}}$. \textbf{Salida:} vector de bits codificados de longitud $2 N_{\text{bits}}$ (tasa base $1/2$), que pasa directamente al bloque de punzado.
+
+\subsection{PUNCTURING (BLOQUE DE PUNZADO)}
 Para lograr las tasas de codificación más altas especificadas en el estándar (como $2/3$, $3/4$ y $5/6$ necesarias para los esquemas MCS avanzados), se implementa la función \texttt{puncture()}. Este bloque remueve periódicamente bits específicos del flujo codificado de tasa 1/2 de acuerdo con patrones de máscara de punzado. En el extremo receptor, la función \texttt{depuncture()} realiza la operación inversa, reinsertando bits neutros (llamados borrados o \textit{erasures}) en las posiciones punzadas. Esta estructura de borrado es procesada por el algoritmo de decodificación de Viterbi, el cual omite el cálculo de la distancia de Hamming para dichos bits neutros, preservando la ganancia de codificación sin alterar la estructura del trellis.
 
-\subsection{Entrelazador (Interleaver)}
+\textbf{Entrada:} vector de bits codificados de tasa $1/2$. \textbf{Salida:} vector de bits punzados de tasa $R_c \in \{1/2, 2/3, 3/4, 5/6\}$ según el MCS activo, que pasa al entrelazador.
+
+\subsection{BLOCK INTERLEAVER (ENTRELAZADOR)}
 El bloque entrelazador reordena secuencialmente los bits provenientes del codificador convolucional mediante la función \texttt{interleave()}. El proceso aplica una técnica de entrelazado por bloques donde los bits se escriben fila por fila en una matriz bidimensional de 16 columnas y se leen columna por columna para formar un stream de salida unidimensional. Si el tamaño de la secuencia codificada no es un múltiplo exacto de 16 columnas, la función realiza un relleno automático (\textit{padding}) con ceros lógicos. Este bloque tiene como objetivo dispersar espacialmente los errores en ráfaga (\textit{burst errors}) que se producen en el canal óptico debido a desvanecimientos rápidos o sombras angulares, convirtiéndolos en errores aislados que pueden ser eficientemente resueltos por el decodificador FEC.
 
-\subsection{Mapeo de Constelaciones Complejas}
-La secuencia de bits entrelazada se agrupa y mapea a símbolos complejos en el plano de fase mediante la función \texttt{constellation\_mapping()}. Esta función implementa el mapeo por codificación Gray para asegurar que dos puntos adyacentes de la constelación difieran únicamente en un solo bit, minimizando la probabilidad de error del sistema. El transceptor LiFi desarrollado soporta de manera nativa los esquemas de modulación BPSK (1 bit/símbolo), QPSK (2 bits/símbolo), 16-QAM (4 bits/símbolo), 64-QAM (6 bits/símbolo), 256-QAM (8 bits/símbolo) y 1024-QAM (10 bits/símbolo), cubriendo exhaustivamente los índices del MCS 0 al MCS 11 definidos en el estándar. Para mantener la coherencia en la potencia promedio de la señal multiportadora y facilitar el análisis de ruido, los símbolos complejos se multiplican por un factor de normalización de energía constante según la modulación: $1/\sqrt{(2/3)(M-1)}$, donde $M$ representa el número de puntos de la constelación.
+\textbf{Entrada:} vector de bits punzados. \textbf{Salida:} vector de bits entrelazados de la misma longitud, listo para la asignación de constelación.
 
-\subsection{Simetría Hermitiana}
-Para garantizar que la señal modulada multiportadora OFDM sea estrictamente real en el dominio del tiempo y sea compatible con la modulación de intensidad analógica del diodo LED, los símbolos complejos se organizan en el dominio de la frecuencia mediante la función \texttt{apply\_hermitian\_symmetry()}. Con un tamaño de FFT $N_{\text{fft}} = 1024$ y una frecuencia de muestreo de $f_s = 80\text{ MHz}$, se definen 234 subportadoras de datos activas divididas simétricamente en el espectro positivo (índices 139 al 255 y 257 al 373) centradas alrededor del canal de frecuencia intermedia (índice 256, equivalente a $f_{\text{IF}} = 20\text{ MHz}$). La propiedad de simetría hermitiana mapea los conjugados complejos en el espectro negativo de la siguiente forma:
-\begin{equation}
-X(N_{\text{fft}} - k) = X^*(k), \quad k = 1, 2, \dots, \frac{N_{\text{fft}}}{2} - 1
-\label{eq:simetria}
-\end{equation}
-Donde $X(k)$ representa los símbolos mapeados en frecuencia y $X^*(k)$ es su conjugado complejo. La subportadora 0 (DC) y la subportadora Nyquist $N_{\text{fft}}/2$ (512) se configuran a cero. Los índices fuera de las bandas activas actúan como subportadoras de guarda para prevenir interferencias. Esta configuración permite que los 234 símbolos complejos de datos se transmitan simultáneamente sobre las subportadoras ortogonales mapeadas en frecuencia.
+\subsection{CONSTELLATION MAPPING (ASIGNACIÓN DE CONSTELACIONES)}
+La secuencia de bits entrelazada se agrupa y asigna a símbolos complejos en el plano de fase mediante la función \texttt{constellation\_mapping()}. Esta función implementa la asignación por codificación Gray para asegurar que dos puntos adyacentes de la constelación difieran únicamente en un solo bit, minimizando la tasa de error por símbolo. El transmisor y receptor LC desarrollado soporta los seis esquemas de modulación multinivel definidos en el estándar IEEE 802.11bb: BPSK, QPSK, 16-QAM, 64-QAM, 256-QAM y 1024-QAM, cuyos factores de normalización de energía $K_{\text{norm}}$ se detallan en la Tabla~\ref{tab:mcs_velocidades_bb} del Capítulo~1.
 
-\subsection{Procesamiento IDFT (IFFT)}
-El bloque IDFT traslada la señal desde el dominio de la frecuencia al dominio del tiempo. En la práctica, se implementa mediante el algoritmo de Transformada Rápida de Fourier Inversa (IFFT) a lo largo de las filas de la matriz en la función \texttt{idft\_processing()}. La ecuación temporal para el símbolo OFDM resultante $x(n)$ se define como:
-\begin{equation}
-x(n) = \frac{1}{N_{\text{fft}}} \sum_{k=0}^{N_{\text{fft}}-1} X(k) e^{j \frac{2 \pi k n}{N_{\text{fft}}}}, \quad n = 0, 1, \dots, N_{\text{fft}} - 1
-\label{eq:ifft}
-\end{equation}
-Donde $N_{\text{fft}}$ es el tamaño de la FFT (1024) y $X(k)$ es la entrada con simetría hermitiana. La función realiza una comprobación estricta de la componente imaginaria residual de $x(n)$, asegurando que la amplitud máxima de la componente compleja imaginaria resultante sea despreciable (menor a $10^{-12}$) y extrayendo de forma limpia la parte real de la señal temporal.
+\textbf{Entrada:} vector de bits entrelazados. \textbf{Salida:} vector de símbolos complejos QAM normalizados por $K_{\text{norm}}$ (Ec.~\ref{eq:k_norm}), con varianza unitaria. La salida ingresa directamente a la etapa de simetría hermitiana.
 
-\subsection{Inserción de Prefijo Cíclico (CP)}
-El bloque de prefijo cíclico, programado en \texttt{insert\_guard\_interval()}, copia las últimas muestras ($N_{\text{CP}}$ muestras) de cada símbolo OFDM de salida y las anexa al inicio del mismo. En el estándar IEEE 802.11bb, la duración del prefijo cíclico (o intervalo de guarda, GI) se define en el tiempo. A la frecuencia de muestreo de simulación $f_s = 80\text{ MHz}$, los valores se implementan como:
+\subsection{HERMITIAN SYMMETRY (SIMETRÍA HERMITIANA)}
+Para garantizar que la señal modulada multiportadora OFDM sea estrictamente real en el dominio del tiempo y sea compatible con la modulación de intensidad analógica del diodo LED, los símbolos complejos se organizan en el dominio de la frecuencia mediante la función \texttt{apply\_hermitian\_symmetry()}, aplicando la propiedad de simetría hermitiana descrita en la ecuación (\ref{eq:simetria_hermitiana_theory}) del Capítulo~1.
+
+\textbf{Entrada:} vector de 234 símbolos QAM complejos normalizados. \textbf{Operación:} la función construye un vector espectral de 1024 puntos: coloca los 234 símbolos en los índices positivos (139--255 y 257--373), sus conjugados en los índices espejo, y ceros en las subportadoras de guarda, DC ($k=0$) y Nyquist ($k=512$). \textbf{Salida:} vector espectral hermitiano de $N_{\text{fft}} = 1024$ puntos listo para la IFFT.
+
+\subsection{IDFT/IFFT (PROCESAMIENTO DE TRANSFORMADA INVERSA)}
+El bloque IDFT traslada la señal desde el dominio de la frecuencia al dominio del tiempo. En la práctica, se implementa mediante el algoritmo de la IFFT a lo largo de las filas de la matriz en la función \texttt{idft\_processing()}, calculada de acuerdo con la ecuación (\ref{eq:idft_sym}) del Capítulo~1 con un tamaño de FFT $N_{\text{fft}} = 1024$. La función realiza una comprobación estricta de la componente imaginaria residual, asegurando que la amplitud máxima de la componente compleja imaginaria resultante sea de valor despreciable (menor a $10^{-12}$) y extrayendo de forma limpia la parte real de la señal temporal.
+
+\textbf{Entrada:} vector espectral hermitiano de 1024 puntos. \textbf{Salida:} vector temporal real de $N_{\text{fft}} = 1024$ muestras flotantes por símbolo (duración $12.8~\mu$s). La salida pasa directamente a la inserción del prefijo cíclico.
+
+\subsection{GUARD INTERVAL INSERTION (INSERCIÓN DE PREFIJO CÍCLICO)}
+El bloque de prefijo cíclico, programado en \texttt{insert\_guard\_interval()}, copia las últimas muestras ($N_{\text{CP}}$ muestras) de cada símbolo OFDM de salida y las anexa al inicio del mismo, siguiendo la ecuación (\ref{eq:cp_insert}) del Capítulo~1.
+
+\textbf{Entrada:} vector temporal real de 1024 muestras por símbolo. \textbf{Salida:} vector extendido de $N_{\text{fft}} + N_{\text{CP}}$ muestras, con los tres modos implementados:
 \begin{itemize}
-\item \textbf{GI de 0.8 µs:} $N_{\text{CP}} = 64$ muestras ($T_{\text{symbol}} = 13.6\ \mu\text{s}$).
-\item \textbf{GI de 1.6 µs:} $N_{\text{CP}} = 128$ muestras ($T_{\text{symbol}} = 14.4\ \mu\text{s}$).
-\item \textbf{GI de 3.2 µs:} $N_{\text{CP}} = 256$ muestras ($T_{\text{symbol}} = 16.0\ \mu\text{s}$).
+\item \textbf{GI de 0.8~µs:} $N_{\text{CP}} = 64$ muestras ($T_{\text{symbol}} = 13.6\ \mu\text{s}$).
+\item \textbf{GI de 1.6~µs:} $N_{\text{CP}} = 128$ muestras ($T_{\text{symbol}} = 14.4\ \mu\text{s}$).
+\item \textbf{GI de 3.2~µs:} $N_{\text{CP}} = 256$ muestras ($T_{\text{symbol}} = 16.0\ \mu\text{s}$).
 \end{itemize}
-Este intervalo de guarda actúa como un colchón temporal frente a la dispersión por retardo (\textit{delay spread}) del canal óptico, eliminando la Interferencia Entre Símbolos (ISI) y simplificando la ecualización en el receptor.
+La salida pasa directamente al bloque de ventaneado.
 
-\subsection{Ventaneado de Símbolos}
-Para reducir las altas emisiones fuera de banda causadas por las discontinuidades abruptas en los flancos de subida y bajada entre símbolos OFDM consecutivos, se implementa el bloque de ventaneado en la función \texttt{windowing()}. Se aplica una función de ventana de coseno alzado (\textit{Raised Cosine}) en las regiones de transición del símbolo con un factor de roll-off de 0.05. Este suavizado temporal confina la potencia espectral de la señal dentro del canal útil, mejorando la eficiencia espectral del enlace óptico.
+\subsection{WINDOWING (VENTANEADO DE SÍMBOLOS)}
+Para reducir las altas emisiones fuera de banda causadas por las discontinuidades abruptas en los flancos de subida y bajada entre símbolos OFDM consecutivos, se implementa el bloque de ventaneado en la función \texttt{windowing()}, implementando la ecuación (\ref{eq:windowing}) del Capítulo~1.
 
-\subsection{Modulación a Frecuencia Intermedia (FI)}
-En los sistemas VLC para exteriores, las fuentes de iluminación artificial y las fluctuaciones eléctricas introducen un fuerte ruido ambiental y armónicos concentrados en las bajas frecuencias (por debajo de 2 MHz). Para eludir esta banda interferida, el transmisor implementa un bloque de conversión hacia arriba (\textit{up-conversion}) en la función \texttt{iq\_modulation()}. Símbolos temporales se organizan en una secuencia 1D y se multiplican por una señal portadora sinusoidal de frecuencia intermedia $f_{\text{IF}} = 20\text{ MHz}$, utilizando una frecuencia de muestreo de simulación $f_s = 80\text{ MHz}$. La modulación se describe matemáticamente como:
-\begin{equation}
-s_{\text{IF}}(t) = x(t) \cos(2 \pi f_{\text{IF}} t)
-\label{eq:mod_iq}
-\end{equation}
-Donde $x(t)$ es la señal de banda base proveniente del ventaneado y $s_{\text{IF}}(t)$ es la señal modulada resultante. De este modo, la señal de datos útil se desplaza hacia un rango espectral de paso de banda (10 MHz a 30 MHz), garantizando una mayor inmunidad frente a ruidos ambientales y evitando problemas de aliasing al situar el espectro completamente debajo del límite de Nyquist ($f_s / 2 = 40\text{ MHz}$).
+\textbf{Entrada:} vector OFDM con prefijo cíclico de $N_{\text{fft}} + N_{\text{CP}}$ muestras. \textbf{Operación:} se aplica una función de ventana de coseno alzado (\textit{Raised Cosine}) en las regiones de transición del símbolo con un factor de roll-off de 0.05. \textbf{Salida:} símbolo OFDM ventaneado con potencia espectral confinada dentro del canal de 20~MHz. La salida pasa a la modulación I/Q.
 
-\subsection{Polarización DC y Frente Óptico (TX OFE)}
-Dado que los LEDs de iluminación vehicular se controlan por corriente eléctrica unidireccional y su potencia óptica de salida no puede adoptar valores negativos, la señal $s_{\text{IF}}(t)$ debe convertirse en una señal unipolar. El bloque DC bias, implementado en \texttt{add\_dc\_bias()}, añade un nivel de desplazamiento continuo constante $B_{\text{DC}}$ a la señal alterna. La simulación utiliza un bias adaptativo que calcula de manera instantánea el valor mínimo de la señal y le añade un offset de seguridad para situar la señal justo sobre cero:
-\begin{equation}
-s_{\text{biased}}(t) = s_{\text{IF}}(t) + B_{\text{DC}}, \quad B_{\text{DC}} = -\min(s_{\text{IF}}(t)) + 0.05
-\label{eq:bias}
-\end{equation}
-Posteriormente, la señal unipolar $s_{\text{biased}}(t)$ ingresa al bloque del Frente Óptico de Transmisión (\texttt{tx\_optical\_front\_end()}). Este bloque modela la limitación física del driver y el punto de operación lineal del emisor LED aplicando una función de recorte (\textit{clipping}) de la amplitud que corta la señal si esta excede los niveles definidos entre $led_{\text{min}} = 0.0\text{ A}$ y $led_{\text{max}} = 5.0\text{ A}$ (para soportar constelaciones densas como 1024-QAM sin distorsión por recorte). Esto limita la potencia de pico de la señal óptica radiada para evitar la distorsión armónica no lineal de los dispositivos físicos.
+\subsection{I/Q MODULATION (MODULACIÓN I/Q)}
+En los sistemas VLC para exteriores, las fuentes de iluminación artificial y las fluctuaciones eléctricas introducen un fuerte ruido ambiental y armónicos concentrados en las bajas frecuencias (por debajo de 2~MHz). Para eludir esta banda interferida, el transmisor implementa un bloque de conversión hacia arriba (\textit{up-conversion}) en la función \texttt{iq\_modulation()}, de acuerdo con la ecuación (\ref{eq:sf_if}) del Capítulo~1.
 
-\section{Modelo Físico y de Propagación del Canal Óptico en Exteriores}
-El canal óptico modela de forma determinista la propagación y atenuación de la luz visible en el espacio libre, así como las fuentes de ruido presentes en entornos exteriores de tipo vehicular V2I. La función central \texttt{optical\_wireless\_channel()} implementa este bloque.
-
-\subsection{Ganancia DC del Canal Lambertiano (LOS)}
-Para un enlace de línea de vista (LOS) directo entre la infraestructura vial (semáforo emisor LED) y el vehículo receptor (fotodetector), la ganancia de canal en corriente continua $H(0)$ se describe mediante el modelo de radiación Lambertiano:
-\begin{equation}
-H(0) = \frac{(m + 1) A_{\text{rx}}}{2 \pi d^2} \cos^m(\phi) g(\psi) T_s(\psi) \cos(\psi), \quad 0 \le \psi \le \Psi_{c}
-\label{eq:lambert}
-\end{equation}
-Donde:
-\begin{itemize}
-\item $m$ es el orden de radiación de Lambert, calculado como $m = -\ln(2) / \ln(\cos(\phi_{1/2}))$, donde $\phi_{1/2}$ es el semi-ángulo de potencia media del LED. Para modelar un haz directivo de faro o semáforo inteligente VLC, se asume $\phi_{1/2} = 15^\circ$, lo que resulta en un orden directivo de $m \approx 29.91$.
-\item $d$ es la distancia lineal tridimensional (slant range) en metros entre el emisor y el receptor, dada por $d = \sqrt{x^2 + \Delta H^2}$, donde $x$ es la distancia horizontal de aproximación sobre la calle y $\Delta H = 4.0\text{ m}$ es la diferencia de altura (semáforo a $5.5\text{ m}$ y receptor a $1.5\text{ m}$).
-\item $A_{\text{rx}}$ es el área de captación efectiva del receptor. Gracias al uso de lentes ópticas colimadoras en el vehículo, el área física del fotodiodo se expande virtualmente a un área de captación de $A_{\text{rx}} = 10\text{ cm}^2$ ($10^{-3}\text{ m}^2$).
-\item $\phi$ y $\psi$ son los ángulos de irradiancia del transmisor y de incidencia del receptor, respectivamente. En la geometría de aproximación vehicular V2I (uplink), el emisor LED del vehículo está inclinado $15^\circ$ hacia arriba para apuntar a la infraestructura (de modo que $\phi = |\theta - 15^\circ|$) y el receptor fotodetector en el semáforo está orientado de forma horizontal (de modo que $\psi = \theta$). Ambos ángulos varían dinámicamente según la distancia horizontal de aproximación $x$ a través del ángulo de elevación instantáneo $\theta = \arctan(\Delta H / x)$ (en grados).
-\item $T_s(\psi)$ es la ganancia del filtro óptico del receptor ($1.0$).
-\item $g(\psi)$ es la ganancia del concentrador óptico de refracción, dada por $g(\psi) = \frac{n_{\text{conc}}^2}{\sin^2(\Psi_c)}$ para un ángulo de incidencia menor o igual al campo de visión ($\Psi_c = 60\text{ grados}$, índice de refracción $n_{\text{conc}} = 1.5$, lo que resulta en $g(\psi) \approx 3.0$), y $g(\psi) = 0$ de lo contrario (cuando $\psi > 60^\circ$, el enlace entra en zona de corte o punto ciego).
-\end{itemize}
-
-El criterio de simulación de canal modela geométricamente el desplazamiento de un automóvil que transmite hacia un semáforo inteligente en un enlace de tipo Vehículo a Infraestructura (V2I). A medida que el vehículo avanza ($x$ decrece), la distancia 3D y los ángulos cambian dinámicamente en tiempo real en cada paso. Cuando el vehículo está a una distancia horizontal menor a $2.3\text{ m}$, el ángulo de incidencia supera el campo de visión límite del receptor ($\psi = \theta > 60^\circ$), provocando un corte o "punto ciego" óptico instantáneo, lo que constituye una característica clave en el diseño de enlaces direccionales.
+\textbf{Entrada:} vector temporal OFDM ventaneado (real, en banda base). \textbf{Operación:} multiplicación muestra a muestra por $\cos(2\pi f_{\text{IF}} t)$ con $f_{\text{IF}} = 20\text{ MHz}$ y $f_s = 80\text{ MHz}$. \textbf{Salida:} señal OFDM a frecuencia intermedia en la banda 10--30~MHz, como se ilustra en la Figura~\ref{fig:modulo_espectro_fi}. La señal resultante entra al bloque de bias DC.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{Diagrama V2I.png}
-\caption{Diagrama esquemático de la geometría del enlace óptico vehicular V2I (uplink) con emisor LED inclinado y fotodetector horizontal.}
-\label{fig:diagrama_v2i}
+\includegraphics[width=0.75\textwidth]{modulo_espectro_fi.png}
+\caption{Desplazamiento espectral de la señal multiportadora DCO-OFDM desde la banda base hacia la frecuencia intermedia de $20\text{ MHz}$ para eludir interferencias de bajas frecuencias.}
+\label{fig:modulo_espectro_fi}
 \end{figure}
 
-\subsection{Atenuación Atmosférica Extrínseca (Ley de Beer-Lambert)}
-En escenarios exteriores vehiculares V2I, la luz visible sufre atenuación adicional debido a la dispersión geométrica y molecular provocada por fenómenos meteorológicos en la atmósfera (lluvia, neblina). Esta pérdida se integra al canal óptico multiplicando la ganancia Lambertiana $H(0)$ por el factor exponencial de decaimiento de la ley de Beer-Lambert:
-\begin{equation}
-P_{\text{rx\_optical}}(t) = H(0) e^{-\beta d} P_{\text{opt}}(t)
-\label{eq:beer_lambert}
-\end{equation}
-Donde $\beta$ representa el coeficiente de extinción del medio atmosférico en $\text{m}^{-1}$, y $d$ es la distancia de enlace. Se modelan coeficientes de extinción específicos de $\beta_{\text{rain}} = 0.05\text{ m}^{-1}$ para simular lluvia moderada, y $\beta_{\text{fog}} = 0.15\text{ m}^{-1}$ para simular condiciones de neblina moderada.
+\subsection{DC BIAS \& TX OFE (POLARIZACIÓN Y FRENTE ÓPTICO)}
+Dado que los LEDs de iluminación vehicular se controlan por corriente eléctrica unidireccional y su potencia óptica de salida no puede adoptar valores negativos, la señal $s_{\text{IF}}(t)$ debe convertirse en una señal unipolar. El bloque DC bias, implementado en \texttt{add\_dc\_bias()}, añade un nivel de desplazamiento continuo constante $B_{\text{DC}}$ a la señal alterna, de acuerdo con la Ec.~(\ref{eq:dc_bias}) del Capítulo~1. La simulación utiliza un bias adaptativo: $B_{\text{DC}} = -\min(s_{\text{IF}}(t)) + 0.05$, que sitúa la señal justo sobre cero con un margen de $0.05\text{ A}$.
 
-\subsection{Caracterización del Ruido en el Fotodetector}
-El receptor de luz convierte la potencia óptica en fotocorriente, a la cual se le añade ruido blanco gaussiano aditivo (AWGN) proveniente de dos fuentes físicas principales:
-\begin{enumerate}
-\item \textbf{Ruido de Disparo (Shot Noise):} Generado por las fluctuaciones cuánticas del flujo de fotones incidentes, dominado en exteriores por la luz solar de fondo constante. La varianza eléctrica del ruido de disparo se calcula como:
-\begin{equation}
-\sigma^2_{\text{shot}} = 2 q I_{\text{bg}} B_{\text{noise}}
-\label{eq:shot}
-\end{equation}
-Donde $q = 1.602 \times 10^{-19}\text{ C}$ es la carga del electrón, $B_{\text{noise}} = 40\text{ MHz}$ es el ancho de banda equivalente de ruido del receptor, e $I_{\text{bg}}$ es la fotocorriente generada por la luz solar de fondo. $I_{\text{bg}}$ se calcula como $R \cdot P_{\text{sol}}$, donde $R = 0.6\text{ A/W}$ es la responsividad del fotodiodo y $P_{\text{sol}} = E_{\text{sol}} A_{\text{rx}} T_s g(\psi)$ es la potencia solar captada bajo una irradiancia solar $E_{\text{sol}}$ en $\text{W/m}^2$. Es importante destacar que el cálculo de la ganancia angular del concentrador óptico $g(\psi)$ para el ruido de disparo solar se realiza considerando de forma estricta la conversión angular (comparando el ángulo de incidencia $\psi$ y el campo de visión del receptor $\Psi_c$ en radianes), garantizando que la fotocorriente solar no se anule erróneamente en el dominio analógico de la simulación.
-\item \textbf{Ruido Térmico (Thermal Noise):} Originado por la agitación térmica de los portadores de carga dentro de las resistencias del amplificador de transimpedancia (TIA). Se modela mediante una varianza eléctrica fija constante $\sigma^2_{\text{thermal}} = 10^{-16}\text{ A}^2$ a temperatura ambiente de $290\text{ K}$.
-\end{enumerate}
+\textbf{Entrada:} señal OFDM alterna $s_{\text{IF}}(t)$ (bipolar). \textbf{Salida (DC Bias):} señal unipolar $s_{\text{biased}}(t)$ lista para el front-end óptico. Posteriormente, la señal unipolar ingresa al bloque del Frente Óptico de Transmisión (\texttt{tx\_optical\_front\_end()}), que aplica una función de recorte (\textit{clipping}) entre $led_{\text{min}} = 0.0\text{ A}$ y $led_{\text{max}} = 5.0\text{ A}$, y convierte la corriente en potencia óptica $P_{\text{opt}}(t)$ (Ec.~\ref{eq:p_opt_conv}). \textbf{Salida final:} potencia óptica instantanea en vatios, representada en la Figura~\ref{fig:modulo_led_intensidad}, que se propaga por el canal óptico.
 
-La varianza total del ruido en el dominio eléctrico es la suma de ambos: $\sigma^2_{\text{total}} = \sigma^2_{\text{shot}} + \sigma^2_{\text{thermal}}$. En la simulación, el ruido gaussiano se aplica dividiendo esta varianza por la responsividad del fotodetector ($R^2$) para sumarlo de manera directa en el dominio óptico antes de la etapa del receptor.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{modulo_led_intensidad.png}
+\caption{Modulación de intensidad analógica en el emisor LED mostrando el desplazamiento mediante la componente de polarización continua ($B_{\text{DC}}$) adaptativa para operar en el rango unipolar.}
+\label{fig:modulo_led_intensidad}
+\end{figure}
 
-\subsection{Relación Señal a Ruido (SNR) Eléctrica}
-La Relación Señal a Ruido eléctrica instantánea tras el bloqueo DC del receptor se define como la relación entre la potencia promedio de la señal de datos alterna y la potencia total del ruido del enlace en el dominio eléctrico:
-\begin{equation}
-\text{SNR}_{\text{elec}} = \frac{P_{\text{sig,elec}}}{\sigma^2_{\text{total}}} = \frac{\text{Var}\left(R \cdot H(0) e^{-\beta d} s_{\text{biased\_clean}}(t) - \text{mean}(R \cdot H(0) e^{-\beta d} s_{\text{biased\_clean}}(t))\right)}{\sigma^2_{\text{shot}} + \sigma^2_{\text{thermal}}}
-\label{eq:snr}
-\end{equation}
-Donde $s_{\text{biased\_clean}}(t)$ es la señal unipolar transmitida libre de ruido y $\text{Var}()$ calcula la potencia de la señal de datos pura de corriente alterna. Esta relación SNR disminuye a medida que aumenta la distancia $d$ debido a la ley cuadrática de atenuación geométrica ($1/d^2$) y la atenuación exponencial de Beer-Lambert.
+\section{MODELO DE PROPAGACIÓN}
 
-\subsection{Criterio de Escenarios Meteorológicos de Simulación}
-El canal óptico modela de forma determinista los cuatro escenarios de simulación mediante la parametrización física de la irradiancia solar de fondo ($E_{\text{sol}}$) y del coeficiente de extinción atmosférica ($\beta$). Los criterios de diseño físico se detallan en la Tabla \ref{tab:escenarios}:
+El canal óptico traduce la potencia óptica emitida por el LED vehicular en una señal eléctrica ruidosa en el fotodetector de la RSU, incorporando la atenuación geométrica, la extinción atmosférica y las fuentes de ruido propias de un entorno exterior V2I. En el simulador, toda esta lógica se centraliza en la función \texttt{optical\_wireless\_channel()} de la biblioteca \texttt{physical\_layer.py}. La Tabla~\ref{tab:funciones_canal} resume la correspondencia entre los bloques del canal y las funciones del código.
 
 \begin{table}[H]
 \centering
-\caption{Parámetros Físicos de los Escenarios Meteorológicos de Simulación}
-\label{tab:escenarios}
-\begin{tabular}{|P{3cm}|P{2.2cm}|P{2.2cm}|p{7.1cm}|}
+\caption{Correspondencia de bloques del canal óptico a funciones de la implementación}
+\label{tab:funciones_canal}
+\begin{tabular}{|p{5.2cm}|p{4.8cm}|p{4.2cm}|}
 \hline
-\textbf{Escenario} & \textbf{Irrad. Solar Efec.} $E_{\text{sol}}$ & \textbf{Coef. Extinción} $\beta$ & \textbf{Criterio y Limitación Física (Filtro del 99.7\%)} \\ \hline
-Noche Despejada (Ideal) & $0\text{ W/m}^2$ & $0.0\text{ m}^{-1}$ & Canal óptico ideal. Sin atenuación de Beer-Lambert. Ruido mínimo limitado por el ruido térmico.\\ \hline
-Día Soleado (Ruido Solar) & $0.5\text{ W/m}^2$ & $0.0\text{ m}^{-1}$ & Ruido de disparo solar máximo efectivo ($E_{\text{sol, brut}} = 150\text{ W/m}^2$ atenuado en 99.7\% por el filtro óptico).\\ \hline
-Lluvia Moderada & $0.2\text{ W/m}^2$ & $0.05\text{ m}^{-1}$ & Cielo nublado ($E_{\text{sol, brut}} = 50\text{ W/m}^2$ atenuado en 99.7\%). Dispersión geométrica leve por gotas de lluvia.\\ \hline
-Neblina Moderada & $0.1\text{ W/m}^2$ & $0.15\text{ m}^{-1}$ & Mayor pérdida. Coeficiente alto (visibilidad $\approx 100\text{ m}$ con sol de $30\text{ W/m}^2$ atenuado en 99.7\% por el filtro). Dispersión Mie extrema.\\ \hline
+\textbf{Bloque del Canal} & \textbf{Función Python} & \textbf{Módulo} \\ \hline
+Canal óptico vehicular completo & \texttt{optical\_wireless\_channel()} & \texttt{physical\_layer.py} \\ \hline
+Parámetros geométricos y de escenario & \texttt{config\_entorno.py} & Configuración global \\ \hline
 \end{tabular}
 \end{table}
 
-\section{Diseño e Implementación del Receptor (RX) Óptico}
-El receptor de la capa física LiFi procesa la señal de potencia óptica recibida para recuperar la trama de bits de información ejecutando las funciones inversas del transmisor.
+\subsection{FUNCIÓN \texttt{optical\_wireless\_channel()}}
 
-\subsection{Frente Óptico del Receptor}
-El bloque RX OFE, modelado en \texttt{rx\_optical\_front\_end()}, simula la acción del fotodiodo de silicio y el amplificador de transimpedancia. La potencia óptica incidente (señal útil atenuada por el canal y sumada al ruido equivalente en el dominio óptico) se convierte en una corriente eléctrica analógica proporcional utilizando una constante de responsividad del fotodetector $R = 0.6\text{ A/W}$:
-\begin{equation}
-i_{\text{rx}}(t) = R \cdot P_{\text{rx\_noisy}}(t)
-\label{eq:corriente_rx}
-\end{equation}
+Esta función implementa en cascada todos los fenómenos físicos del enlace V2I en un único bloque de procesamiento. El flujo interno sigue el orden: geometría del enlace $\rightarrow$ ganancia Lambertiana $\rightarrow$ atenuación atmosférica $\rightarrow$ cálculo de ruido $\rightarrow$ inyección de ruido $\rightarrow$ registro de SNR.
 
-\subsection{Bloqueo de Corriente Continua (DC Block)}
-La corriente $i_{\text{rx}}(t)$ contiene una componente continua alta provocada por la corriente de polarización constante ($B_{\text{DC}}$) del transmisor y la luz solar de fondo. El bloque de bloqueo DC, implementado en \texttt{remove\_dc\_bias()}, remueve la corriente continua promedio restando el valor medio aritmético de la señal para aislar la componente alterna que aloja la información útil:
-\begin{equation}
-i_{\text{ac}}(t) = i_{\text{rx}}(t) - \text{mean}(i_{\text{rx}}(t))
-\label{eq:bloqueo_dc}
-\end{equation}
+\textbf{Entradas:}
+\begin{itemize}
+    \item $P_{\text{opt}}(t)$: vector de potencia óptica emitida en vatios, salida de \texttt{tx\_optical\_front\_end()}.
+    \item $x$: posición horizontal del vehículo respecto al semáforo en metros. Parámetro de barrido del lazo Monte Carlo (rango: 1~m a 50~m).
+    \item $E_{\text{sol}}$, $\beta$: parámetros del escenario meteorológico activo, definidos en \texttt{config\_entorno.py} y detallados en la Tabla~\ref{tab:escenarios_clima} del Capítulo~1.
+    \item $R = 0.6\text{ A/W}$: responsividad del fotodiodo.
+\end{itemize}
 
-\subsection{Demodulación a FI y Filtrado Butterworth}
-La señal eléctrica $i_{\text{ac}}(t)$ se demodula en la función \texttt{iq\_demodulation()} para retornar de la frecuencia intermedia a la banda base. Se realiza la conversión hacia abajo multiplicando la señal por la portadora sinusoidal local $\cos(2 \pi f_{\text{IF}} t)$ a $f_{\text{IF}} = 20\text{ MHz}$. Para compensar el factor de atenuación medio de la demodulación, se multiplica el producto por un factor de escala de 2.0. Posteriormente, para eliminar los armónicos de alta frecuencia del mezclador y aislar el espectro de datos, la señal pasa por un filtro paso bajos digital Butterworth de 5to orden con frecuencia de corte de 15 MHz, implementado en fase lineal mediante la función \texttt{filtfilt()} para evitar la distorsión del retardo de grupo.
+\textbf{Operación interna en cascada:}
+\begin{enumerate}
+    \item \textbf{Geometría del enlace:} Calcula la distancia tridimensional $d$ y los ángulos $\phi$, $\psi$ mediante las Ecs.~\ref{eq:distancia_v2i}--\ref{eq:angulos_v2i} del Capítulo~1. La geometría del escenario se ilustra en la Fig.~\ref{fig:diagrama_v2i} del Capítulo~1. Si $\psi > \Psi_c = 60^\circ$, la ganancia se fuerza a cero (zona ciega).
+    \item \textbf{Ganancia Lambertiana:} Evalúa $H(0)$ con los ángulos y la distancia calculados, según la Ec.~\ref{eq:ganancia_dc} del Capítulo~1. El orden lambertiano $m \approx 29.91$ corresponde al semiángulo de haz del LED vehicular $\theta_{1/2} = 15^\circ$.
+    \item \textbf{Atenuación atmosférica:} Multiplica la señal por el factor $e^{-\beta d}$ (Ec.~\ref{eq:beer_lambert_theory}), incorporando la extinción por lluvia o neblina según el escenario.
+    \item \textbf{Cálculo de ruido:} Calcula $\sigma^2_{\text{shot}}$ con los valores actuales de $g(\psi)$ y $E_{\text{sol}}$ (Ec.~\ref{eq:shot_noise_theory}), y suma $\sigma^2_{\text{thermal}} = 10^{-16}\text{ A}^2$. El ruido total $\sigma^2_{\text{total}}$ se convierte al dominio óptico dividiendo entre $R^2$, para ser consistente con la señal de potencia.
+    \item \textbf{Inyección de ruido:} Genera un vector gaussiano aleatorio de media cero y varianza $\sigma^2_{\text{total}}/R^2$ que se suma a la señal de potencia óptica atenuada.
+    \item \textbf{Registro de SNR:} Calcula la SNR instantánea sobre la señal limpia (sin ruido añadido) según la Ec.~\ref{eq:snr_theory} y la retorna como valor de salida para su registro por el lazo Monte Carlo.
+\end{enumerate}
 
-\subsection{Remoción de Intervalo de Guarda}
-La señal analógica demodulada se corta y organiza en la función \texttt{remove\_guard\_interval()} en una matriz de dimensiones correspondientes al número de símbolos transmitidos. Para cada símbolo OFDM de longitud total con CP, se descarta el intervalo de guarda frontal de 64, 128 o 256 muestras (para GIs de 0.8 µs, 1.6 µs o 3.2 µs, respectivamente), recuperando el bloque original de 1024 muestras temporales por símbolo.
+\textbf{Salidas:}
+\begin{itemize}
+    \item $P_{\text{rx}}(t)$: vector de potencia óptica recibida en vatios, con ruido gaussiano incluido. Esta señal es la entrada directa al bloque \texttt{rx\_optical\_front\_end()}.
+    \item $\text{SNR}$ (dB): SNR instantánea, registrada en el arreglo de resultados Monte Carlo junto con la distancia $x$ del punto de operación.
+\end{itemize}
 
-\subsection{Procesamiento DFT (FFT)}
-El bloque DFT traslada la señal del dominio del tiempo de regreso al dominio de la frecuencia mediante la Transformada Rápida de Fourier (FFT) aplicada a lo largo de las filas de la matriz en la función \texttt{dft\_processing()}:
-\begin{equation}
-Y(k) = \sum_{n=0}^{N_{\text{fft}}-1} y(n) e^{-j \frac{2 \pi k n}{N_{\text{fft}}}}, \quad k = 0, 1, \dots, N_{\text{fft}} - 1
-\label{eq:fft}
-\end{equation}
+\subsection{CONFIGURACIÓN DE ESCENARIOS METEOROLÓGICOS}
 
-\subsection{Ecualización en Frecuencia (FDE)}
-Antes de extraer los datos, los símbolos complejos en el dominio de la frecuencia $Y(k)$ se someten a una ecualización de canal en frecuencia de un toque (\textit{Single-Tap Frequency Domain Equalization}) en el script \texttt{test\_phy.py}. Esto compensa las pérdidas por distancia del canal Lambertiano y la conversión electro-óptica dividiendo los símbolos complejos de salida entre el factor de ganancia efectiva constante en corriente continua y el filtro analógico estimado:
-\begin{equation}
-\hat{X}(k) = \frac{Y(k)}{H(0) \cdot R \cdot H_{\text{filter}}(k)}
-\label{eq:feq}
-\end{equation}
-Donde $H_{\text{filter}}(k)$ representa la respuesta espectral del filtro analógico Butterworth, estimada previamente en la etapa de calibración inicial del receptor. Esta ecualización corrige tanto la pérdida geométrica como la atenuación de las subportadoras en los bordes del filtro analógico de paso bajo. Para garantizar la escala correcta de las amplitudes en constelaciones densas (como 64-QAM y 1024-QAM), la respuesta espectral del filtro $H_{\text{filter}}(k)$ medida en la calibración libre de ruido (realizada con un área de receptor ficticia de $\pi$ y distancia de 1.0 m) se normaliza dividiéndola por la ganancia de acoplamiento óptico teórica de calibración ($H_{0,\text{cal}} \approx 1.33$ A/W), lo que asegura que el filtro actúe con ganancia unitaria en banda de paso.
+Los cuatro escenarios de simulación (Noche Despejada, Día Soleado, Lluvia Moderada y Neblina Moderada) se parametrizan mediante el par $(E_{\text{sol}},\, \beta)$ definido en \texttt{config\_entorno.py}. Sus valores y criterios de selección se encuentran en la Tabla~\ref{tab:escenarios_clima} del Capítulo~1. El simulador selecciona el escenario activo como argumento del lazo Monte Carlo externo, de modo que cada curva BER vs.\ distancia se genera bajo condiciones meteorológicas fijas e independientes.
 
-\subsection{Extracción de Subportadoras Activas y Remoción de Simetría}
-El bloque \texttt{remove\_hermitian\_symmetry()} extrae los símbolos complejos de datos útiles ecualizados únicamente de las 234 subportadoras positivas activas (índices 139 al 255 y 257 al 373). Las subportadoras de guarda, DC y el espectro simétrico conjugado redundante se descartan por completo, obteniendo una secuencia lineal de símbolos QAM complejos listos para la demisión.
 
-\subsection{Desmapeo de Constelaciones (Demapper)}
+
+\section{DISEÑO E IMPLEMENTACIÓN DEL RECEPTOR (RX) ÓPTICO}
+El receptor de la capa física de comunicaciones por luz procesa la señal de potencia óptica recibida para recuperar la trama de bits de información ejecutando las funciones inversas del transmisor.
+
+\subsection{RX OFE (FRENTE ÓPTICO DEL RECEPTOR)}
+El bloque RX OFE, modelado en la función \texttt{rx\_optical\_front\_end()}, simula la acción del fotodiodo de silicio y el amplificador de transimpedancia.
+
+\textbf{Entrada:} potencia óptica recibida $P_{\text{rx}}(t)$ en vatios (señal útil atenuada por el canal más ruido gausiano inyectado en el dominio óptico). \textbf{Operación:} multiplicación de cada muestra por la responsividad $R = 0.6\text{ A/W}$. \textbf{Salida:} corriente eléctrica analógica $i_{\text{rx}}(t) = R \cdot P_{\text{rx}}(t)$ en amperios, que pasa directamente al bloque DC~Block.
+
+\subsection{DC BLOCK (BLOQUEO DE CORRIENTE CONTINUA)}
+La corriente recibida contiene una componente continua alta provocada por la corriente de polarización constante ($B_{\text{DC}}$) del transmisor y la luz solar de fondo. El bloque de bloqueo DC, implementado en la función \texttt{remove\_dc\_bias()}, remueve la corriente continua promedio restando el valor medio de la señal para aislar la componente alterna que aloja la información útil.
+
+\textbf{Entrada:} corriente eléctrica $i_{\text{rx}}(t)$ con componente DC alta. \textbf{Operación:} $i_{\text{ac}}(t) = i_{\text{rx}}(t) - \overline{i_{\text{rx}}}$, donde $\overline{i_{\text{rx}}}$ es el valor medio de la corriente. \textbf{Salida:} corriente alterna $i_{\text{ac}}(t)$ de media cero lista para la demodulación I/Q. En este mismo punto, se calcula la SNR (Ec.~\ref{eq:snr_theory}) y se registra como métrica de calidad del enlace.
+
+\subsection{I/Q DEMODULATOR \& FILTERING (DEMODULACIÓN Y FILTRADO)}
+La señal eléctrica filtrada se demodula en la función \texttt{iq\_demodulation()} para retornar de la frecuencia intermedia a la banda base.
+
+\textbf{Entrada:} corriente alterna $i_{\text{ac}}(t)$ a frecuencia intermedia. \textbf{Operación:} (1) multiplicación por $\cos(2\pi f_{\text{IF}} t)$ con factor de escala de 2.0 para la conversión hacia abajo; (2) filtrado paso-bajos digital Butterworth de 5.\textordmasculine~orden con frecuencia de corte de 15~MHz, implementado en fase lineal mediante \texttt{filtfilt()} para evitar la distorsión del retardo de grupo. \textbf{Salida:} señal OFDM de banda base real lista para la remoción del prefijo cíclico, como se ilustra en la Figura~\ref{fig:modulo_comparacion_rx}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{modulo_comparacion_rx.png}
+\caption{Comparación en el dominio del tiempo entre la señal de banda base original transmitida y la señal demodulada y filtrada bajo un enlace ideal sin ruido.}
+\label{fig:modulo_comparacion_rx}
+\end{figure}
+
+\subsection{GUARD INTERVAL REMOVAL (REMOCIÓN DE INTERVALO DE GUARDA)}
+La señal analógica demodulada se corta y organiza en la función \texttt{remove\_guard\_interval()}.
+
+\textbf{Entrada:} señal continua de banda base de longitud $N_{\text{símbolos}} \times (N_{\text{fft}} + N_{\text{CP}})$ muestras. \textbf{Operación:} reorganización en una matriz de $N_{\text{símbolos}}$ filas, descartando los primeros $N_{\text{CP}} = 64$, $128$ ó $256$ muestras por fila según el GI activo. \textbf{Salida:} matriz de $N_{\text{símbolos}} \times 1024$ muestras de datos puros por símbolo OFDM, sin prefijo cíclico, lista para la DFT.
+
+\subsection{DFT/FFT (PROCESAMIENTO DFT)}
+El bloque DFT traslada la señal del dominio del tiempo de regreso al dominio de la frecuencia mediante la Transformada Rápida de Fourier (FFT) aplicada a lo largo de las filas de la matriz en la función \texttt{dft\_processing()}, siguiendo la expresión matemática de la ecuación (\ref{eq:dft_theory}) del Capítulo~1.
+
+\textbf{Entrada:} matriz de $N_{\text{símbolos}} \times 1024$ muestras temporales reales. \textbf{Salida:} matriz de $N_{\text{símbolos}} \times 1024$ coeficientes espectrales complejos $Y(k)$ por símbolo, listos para la ecualización FEQ.
+
+\subsection{FEQ / FDE (ECUALIZACIÓN EN FRECUENCIA)}
+Antes de extraer los datos, los símbolos complejos en el dominio de la frecuencia se someten a la ecualización FEQ de un solo toque (Ec.~\ref{eq:feq_theory} del Capítulo~1). Esta ecualización se realiza en el script \texttt{test\_phy.py} dividiendo los símbolos complejos de salida entre el factor de ganancia de canal DC de referencia y el filtro analógico estimado.
+
+\textbf{Entrada:} vector espectral $Y(k)$ de 1024 coeficientes. \textbf{Operación:} $\hat{X}(k) = Y(k) / [H_{\text{ref}}(0) \cdot R \cdot H_{\text{filter}}(k)]$. La calibración inicial se realiza en un canal de referencia ideal a distancia fija de $1.0$~m y con un emisor ficticio estándar de semi-ángulo $\theta_{1/2} = 60.0^\circ$ ($m_{\text{ref}} \approx 1$), asegurando que la estimación espectral del filtro sea independiente de la geometría vehicular. \textbf{Salida:} vector de 1024 símbolos complejos ecualizados $\hat{X}(k)$, de los cuales solo se usarán las 234 subportadoras activas. En la Figura~\ref{fig:modulo_constelacion_rx} se presenta el diagrama de constelación resultante tras la ecualización.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{modulo_constelacion_rx.png}
+\caption{Diagrama de constelación ecualizado en el receptor para un esquema 16-QAM bajo un canal óptico ideal libre de interferencias.}
+\label{fig:modulo_constelacion_rx}
+\end{figure}
+
+\subsection{SUBCARRIER DE-ALLOCATION (EXTRACCIÓN DE SUBPORTADORAS ACTIVAS)}
+El bloque \texttt{remove\_hermitian\_symmetry()} extrae los símbolos complejos de datos útiles ecualizados únicamente de las 234 subportadoras positivas activas (índices 139 al 255 y 257 al 373). Las subportadoras de guarda, DC y el espectro simétrico conjugado redundante se descartan por completo.
+
+\textbf{Entrada:} vector de 1024 coeficientes ecualizados. \textbf{Salida:} secuencia lineal de 234 símbolos QAM complejos listos para el demapping de constelación.
+
+\subsection{CONSTELLATION DEMAPPER (DEMAPPING DE CONSTELACIONES)}
 La función \texttt{constellation\_demapping()} implementa un demapper de decisión dura para estimar la secuencia de bits. Para BPSK y QPSK se aplican umbrales de decisión sencillos respecto a cero en las componentes en fase (real) y cuadratura (imaginaria). Para constelaciones multinivel complejas (16-QAM, 64-QAM, 256-QAM y 1024-QAM), la función calcula la distancia euclidiana de cada símbolo recibido frente a todos los puntos de referencia normalizados de la constelación Gray teórica, seleccionando el punto con la menor distancia (decisión dura) y recuperando los bits correspondientes.
 
-\subsection{Desentrelazador (Deinterleaver)}
+\textbf{Entrada:} vector de 234 símbolos QAM complejos ecualizados. \textbf{Salida:} vector de bits estimados $\hat{b}$ de longitud $234 \times \log_2(M)$, que pasa al bloque desentrelazador.
+
+\subsection{BLOCK DEINTERLEAVER (DESENTRELAZADOR)}
 La secuencia de bits estimada se procesa en la función \texttt{deinterleave()} para revertir el orden de transposición aplicado en el transmisor. Los bits se organizan en una matriz con $n_{\text{cols}} = 16$ (transpuesta de la matriz original) y se reordenan de vuelta a la secuencia secuencial original del flujo de datos, eliminando el relleno (\textit{padding}) residual al final si se requirió en la transmisión.
 
-\subsection{Decodificador de Canal FEC (Algoritmo de Viterbi)}
-Finalmente, la secuencia de bits entrelazada pasa al decodificador FEC convolucional en la función \texttt{fec\_decoder()}. Esta función implementa el algoritmo de Viterbi con decisión dura. El algoritmo rastrea las transiciones del codificador convolucional de 4 estados a lo largo de un diagrama de rejilla (\textit{trellis}) calculando de forma iterativa la métrica de camino acumulativa basada en la distancia de Hamming entre los bits recibidos y las salidas válidas de cada transición de estado. 
+\textbf{Entrada:} vector de bits estimados entrelazados. \textbf{Salida:} vector de bits desentrelazados en el orden original de transmisión, que pasa al bloque de depunzado y luego al decodificador FEC.
 
-Debido a que se implementa soporte para punzado, el decodificador de Viterbi ha sido modificado para admitir máscaras de borrado (\textit{erasures}). Al procesar los bits, el algoritmo evalúa la máscara \texttt{is\_erasure}. Si detecta que un par de bits corresponde a una posición de borrado (es decir, fue eliminado en el transmisor por el punzado), el decodificador omite sumar la distancia de Hamming en esa transición, manteniendo intacto el trellis métrico y permitiendo la reconstrucción del mensaje original. Al finalizar la secuencia, el algoritmo realiza un proceso de \textit{traceback} desde el estado con la menor métrica acumulada para reconstruir la secuencia de información de entrada original.
+\subsection{FEC DECODER (DECODIFICADOR DE CANAL)}
+Finalmente, la secuencia de bits entrelazada pasa al decodificador FEC convolucional en la función \texttt{fec\_decoder()}. Esta función implementa el algoritmo de Viterbi con decisión dura. El algoritmo rastrea las transiciones del codificador convolucional de 4 estados a lo largo de un diagrama de rejilla (\textit{trellis}) calculando de forma iterativa la métrica de camino acumulativa basada en la distancia de Hamming entre los bits recibidos y las salidas válidas de cada transición de estado.
 
-\section{Estructura de Validación y Simulación Monte Carlo}
-Para verificar el comportamiento del transceptor físico LiFi desarrollado, se implementó una metodología de pruebas funcionales y estadísticas dentro del script de validación \texttt{test\_phy.py}.
+Debido a que se implementa soporte para punzado, el decodificador de Viterbi se modifica para admitir máscaras de borrado (\textit{erasures}). Al procesar los bits, el algoritmo de Viterbi evalúa la máscara \texttt{is\_erasure}. Si detecta que un par de bits corresponde a una posición de borrado (es decir, fue eliminado en el transmisor por el punzado), el decodificador omite sumar la distancia de Hamming en esa transición, manteniendo intacto el trellis métrico y permitiendo la reconstrucción del mensaje original. Al finalizar la secuencia, el algoritmo realiza un proceso de \textit{traceback} desde el estado con la menor métrica acumulada para reconstruir la secuencia de información de entrada original.
 
-\subsection{Propósito y Estructura del Script de Pruebas (test\_phy.py)}
+\textbf{Entrada:} vector de bits depunzados con máscara de borrados \texttt{is\_erasure}. \textbf{Salida:} vector de bits de información recuperados $\hat{u}$ de longitud $N_{\text{bits}}$. La comparación de este vector con los bits originales $u$ permite calcular la métrica BER (Ec.~\ref{eq:ber}).
+
+\section{ESTRUCTURA DE VALIDACIÓN Y SIMULACIÓN MONTE CARLO}
+Para verificar el comportamiento del transmisor y receptor físico LC desarrollado, se implementa una metodología de pruebas funcionales y estadísticas dentro del script de validación \texttt{test\_phy.py}.
+
+\subsection{PROPÓSITO Y ESTRUCTURA DEL SCRIPT DE PRUEBAS (TEST\_PHY.PY)}
 El script \texttt{test\_phy.py} constituye el entorno de pruebas automatizadas y validación funcional de la capa física. Está diseñado como un conjunto de rutinas lógicas independientes que aseguran la correctitud de las fases de modulación y demodulación antes de realizar simulaciones bajo ruido solar o atenuaciones. El script se ejecuta directamente desde la consola mediante el intérprete de Python, procesando consecutivamente:
 \begin{enumerate}
 \item La validación de simetría hermitiana.
 \item La transmisión ideal sin ruido de todos los 12 MCS y 3 GIs.
-\item El barrido de distancia física y SNR eléctrica bajo ruido solar de fondo (para GI de 0.8 µs).
-\item El barrido analítico de SNR ideal en canal AWGN puro (para GI de 0.8 µs).
+\item El barrido de distancia física y SNR bajo ruido solar de fondo (para GI de 0.8~µs).
+\item El barrido analítico de SNR ideal en canal AWGN puro (para GI de 0.8~µs).
 \item El barrido comparativo de escenarios climáticos en distancia (para modulación QPSK).
 \end{enumerate}
 
-\subsection{Verificaciones Funcionales Unitarias}
-El script \texttt{test\_phy.py} valida la integridad del transceptor físico mediante dos rutinas principales:
+\subsection{VERIFICACIONES FUNCIONALES UNITARIAS}
+El script \texttt{test\_phy.py} valida la integridad del transmisor y receptor físico mediante dos rutinas principales:
 \begin{enumerate}
-\item \textbf{Validación de Simetría Hermitiana:} La función \texttt{test\_hermitian\_symmetry()} genera bits aleatorios, los modula a símbolos complejos, aplica la simetría hermitiana y procesa la IFFT. El script evalúa que la componente imaginaria máxima sea inferior a $10^{-12}$. El cumplimiento exitoso de esta aserción (\texttt{assert}) demuestra que la salida de la IFFT es puramente real y cumple con el principio de transmisión óptica de intensidad.
-\item \textbf{Validación de Canal Ideal:} La función \texttt{test\_ideal\_channel()} interconecta el transmisor y el receptor en un canal óptico de 1.0 metros sin añadir ruido aleatorio ($\sigma^2_{\text{total}} = 0.0$). El script comprueba que no existan errores de bit tras la decodificación (BER = 0.0), validando que las fases de codificación, punzado, modulación, filtrado, sincronización, demodulación, depunzado y decodificación de Viterbi funcionen de forma correcta y simétrica para todos los 12 MCS y 3 GIs definidos.
+\item \textbf{Validación de Simetría Hermitiana:} La función \texttt{test\_hermitian\_symmetry()} genera bits aleatorios, los modula a símbolos complejos, aplica la simetría hermitiana y procesa la IFFT. El script evalúa que la componente imaginaria máxima sea inferior a $10^{-12}$. El cumplimiento del éxito de esta aserción (\texttt{assert}) demuestra que la salida de la IFFT es puramente real y cumple con el principio de transmisión óptica de intensidad.
+\item \textbf{Validación de Canal Ideal:} La función \texttt{test\_ideal\_channel()} interconecta el transmisor y el receptor en un canal óptico de 1.0~metros sin añadir ruido aleatorio ($\sigma^2_{\text{total}} = 0.0$). El script comprueba la ausencia de discrepancias binarias tras la decodificación, validando que las fases de codificación, punzado, modulación, filtrado, sincronización, demodulación, depunzado y decodificación de Viterbi funcionen de forma correcta y simétrica para todos los 12 MCS y 3 GIs definidos.
 \end{enumerate}
 
-\subsection{Simulación de Monte Carlo y Precisión Estadística}
-La evaluación del rendimiento de la comunicación bajo escenarios de ruido aleatorio en exteriores se realiza mediante el método de Monte Carlo. Debido a la naturaleza estocástica del ruido de disparo solar y el ruido térmico, no es suficiente evaluar una única transmisión corta para caracterizar el comportamiento del canal óptico. La simulación Monte Carlo repite el proceso de transmisión bajo la generación independiente de bits de información aleatorios para cada simulación, inyecta ruido blanco gaussiano aditivo (AWGN) en el canal y cuenta acumulativamente los errores de bit resultantes.
+\subsection{SIMULACIÓN DE MONTE CARLO Y PRECISIÓN ESTADÍSTICA}
+La evaluación del rendimiento de la comunicación bajo escenarios de ruido aleatorio en exteriores se realiza mediante el método de Monte Carlo. Debido a la naturaleza estocástica del ruido de disparo solar y el ruido térmico, no es suficiente evaluar una única transmisión corta para caracterizar el enlace. La simulación Monte Carlo repite el proceso de transmisión bajo la generación independiente de bits de información aleatorios para cada simulación, añade ruido aleatorio (de disparo solar y térmico) en el dominio óptico equivalente a través de la función del canal y cuenta de forma acumulativa los errores de bit resultantes en el extremo receptor.
 
-La Tasa de Error de Bit (BER) se calcula estadísticamente dividiendo el número de bits erróneos detectados en la salida del decodificador de Viterbi entre la longitud total de la secuencia de bits de prueba de información:
-\begin{equation}
-\text{BER} = \frac{N_{\text{errores}}}{N_{\text{total}}}
-\label{eq:ber}
-\end{equation}
+La Tasa de Error de Bit (BER) se calcula de forma estadística dividiendo los bits erróneos decodificados a la salida del algoritmo de Viterbi entre la longitud total de la secuencia útil de bits de información, de acuerdo con la Ec.~\ref{eq:ber} del Capítulo~1. A partir de este valor, la velocidad de transmisión efectiva (\textit{Throughput}) en Mbps se estima deduciendo los bits erróneos de la tasa bruta nominal ($R_{\text{raw}}$), siguiendo la Ec.~\ref{eq:throughput} del Capítulo~1. 
 
-La tasa de transmisión efectiva (\textit{Throughput}) en megabits por segundo (Mbps) se calcula deduciendo los bits erróneos de la tasa bruta teórica (\textit{raw data rate}):
-\begin{equation}
-\text{Throughput} = R_{\text{raw}} \cdot (1 - \text{BER})
-\label{eq:throughput}
-\end{equation}
+La velocidad física bruta $R_{\text{raw}}$ se determina según los parámetros de subportadoras de datos activas ($N_{\text{active}} = 234$), el orden de la modulación ($M$), la tasa de codificación ($R_c$) y la duración del símbolo OFDM ($T_{\text{symbol}}$) definidos por el estándar e implementados en el simulador.
 
-Donde $R_{\text{raw}}$ se calcula en la capa física en el aire en base al número de subportadoras de datos activas ($N_{\text{data}} = 234$), el orden de la modulación ($M$), la tasa del código corrector ($R_c$) y la duración total del símbolo OFDM ($T_{\text{symbol}}$):
-\begin{equation}
-R_{\text{raw}} = \frac{234 \cdot \log_2(M) \cdot R_c}{T_{\text{symbol}}} \text{ bps}
-\label{eq:rraw}
-\end{equation}
 
 Para garantizar la flexibilidad computacional e independencia estadística, el script \texttt{test\_phy.py} incorpora una constante global de control denominada \texttt{MONTE\_CARLO\_RUNS}. A partir de esta constante, se configuran de manera proporcional las variables independientes de bits para cada simulación: $N_{\text{BITS\_SOLAR}} = \text{MONTE\_CARLO\_RUNS}$ para el barrido físico, $N_{\text{BITS\_IDEAL}} = \text{MONTE\_CARLO\_RUNS}$ para el barrido analítico ideal y $N_{\text{BITS\_ESCENARIOS}} = \text{MONTE\_CARLO\_RUNS}$ para los escenarios meteorológicos. 
 
-Para las simulaciones finales de caracterización física presentadas en este trabajo, se configuró la constante en \texttt{MONTE\_CARLO\_RUNS = 10000}. Esta cantidad de bits de prueba de información proporciona una precisión estadística suficiente para registrar tasas de error de bit de hasta $10^{-4}$ con un intervalo de confianza estrecho. De igual manera, se utiliza una semilla de aleatoriedad fija mediante \texttt{np.random.seed(123)} para asegurar que los bits generados en cada ejecución sean idénticos, permitiendo comparar los MCS bajo las mismas condiciones y garantizar la repetibilidad de las pruebas.
+Para las simulaciones finales de caracterización física presentadas en este trabajo, se configuró la constante en \texttt{MONTE\_CARLO\_RUNS = 100000}. Esta cantidad de bits de prueba de información proporciona una precisión estadística suficiente para registrar tasas de error de bit de hasta $10^{-5}$ con un intervalo de confianza estrecho. De igual manera, se utiliza una semilla de aleatoriedad fija mediante \texttt{np.random.seed(123)} para asegurar que los bits generados en cada ejecución sean idénticos, permitiendo comparar los MCS bajo las mismas condiciones y garantizar la repetibilidad de las pruebas.
 
-\subsection{Reportes Gráficos e Integración de Resultados}
-Como parte de la validación experimental y metodológica de la capa física desarrollada, el entorno de simulación ejecuta pruebas de transmisión completas y genera reportes gráficos del procesamiento de la señal. A continuación, se presentan los diagramas del procesamiento paso a paso de las señales y los diagramas de constelación del transceptor (Figuras \ref{fig:resultado_ideal} y \ref{fig:resultado_real}), lo que permite evaluar cualitativamente el efecto del ruido solar en los símbolos demodulados antes de pasar a la caracterización cuantitativa del enlace en el Capítulo 3.
+\subsection{CONFIGURACIÓN CENTRALIZADA DEL SIMULADOR}
+Para garantizar la coherencia física y la facilidad de mantenimiento de las simulaciones de la capa física, el simulador del transmisor y receptor VLC/V2I centraliza sus parámetros de diseño (tanto del transmisor y receptor OFDM como de la geometría del canal óptico) en un único archivo de configuración denominado \texttt{config\_entorno.py}. Este archivo es importado por todos los módulos del simulador (\texttt{main.py}, \texttt{test\_phy.py} y \texttt{test\_phy\_grid.py}). La estructura de directorios de este simulador y la guía paso a paso de su instalación se detallan en el Anexo \ref{anexo:manual_simulador} y Anexo \ref{anexo:estructura_archivos_simulador}.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.85\textwidth]{resultado_simulacion_ideal.png}
-\caption{Procesamiento paso a paso de las señales y diagramas de constelación del transceptor en un canal óptico de línea de vista (LOS) ideal a una distancia de 3.0 m, en ausencia de ruido solar de fondo ($E_{\text{sol}} = 0\text{ W/m}^2$) y con un ruido térmico mínimo ($\sigma^2_{\text{thermal}} = 10^{-15}\text{ A}^2$). Se observa la constelación 16-QAM recibida perfectamente ecualizada, logrando una tasa de error de bit de BER = 0.0.}
-\label{fig:resultado_ideal}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.85\textwidth]{resultado_simulacion.png}
-\caption{Procesamiento paso a paso de las señales y diagramas de constelación del transceptor operando bajo ruido solar de fondo severo continuo a mediodía ($E_{\text{sol}} = 150\text{ W/m}^2$) a una distancia de 3.0 m. La alta corriente de fondo genera un intenso ruido de disparo que distorsiona la constelación 16-QAM ecualizada en el receptor, produciendo una tasa de error de bit no nula.}
-\label{fig:resultado_real}
-\end{figure}
-
+Los reportes gráficos correspondientes a la validación cualitativa paso a paso del procesamiento de las señales y los diagramas de constelación del transmisor y receptor se han consolidado al inicio del Capítulo 3 (sección de Resultados y Discusión) para mantener agrupados todos los análisis experimentales y cualitativos antes del barrido masivo de rendimiento.

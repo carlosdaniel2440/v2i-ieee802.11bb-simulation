@@ -1,9 +1,138 @@
+% !TeX root = main.tex
 \clearpage
 \pagenumbering{Roman}
 \setcounter{page}{1}
 
 \chapter*{ANEXOS}
-\addcontentsline{toc}{chapter}{ANEXOS}
+\addcontentsline{toc}{chapter}{\protect\numberline{5}ANEXOS}
 
-\section*{ANEXO I. TÍTULO DEL ANEXO I}
-[Escriba aquí el contenido del Anexo I]
+\section*{ANEXO A. MANUAL DE INSTALACIÓN Y REPRODUCIBILIDAD DEL SIMULADOR}
+\addcontentsline{toc}{section}{ANEXO A. MANUAL DE INSTALACIÓN Y REPRODUCIBILIDAD DEL SIMULADOR}
+\label{anexo:manual_simulador}
+
+Con el fin de garantizar la reproducibilidad y el análisis independiente del simulador físico desarrollado, el código de simulación ha sido consolidado en un repositorio público e independiente de GitHub, el cual contiene únicamente los scripts funcionales de la capa física y los bancos de pruebas.
+
+\subsection*{A.1. Enlace del Repositorio}
+El código fuente limpio se encuentra alojado en la plataforma GitHub en la siguiente dirección URL:
+\begin{center}
+    \url{https://github.com/carlosdaniel2440/v2i-ieee802.11bb-simulation}
+\end{center}
+
+\subsection*{A.2. Comandos de Consola para Instalación y Ejecución}
+Para desplegar y ejecutar las simulaciones en cualquier computadora personal con Python 3.8 o superior instalado, se deben seguir los siguientes pasos de consola:
+
+\begin{enumerate}
+    \item \textbf{Descargar y clonar el repositorio de código:}
+    \begin{verbatim}
+    git clone https://github.com/carlosdaniel2440/v2i-ieee802.11bb-simulation.git
+    cd v2i-ieee802.11bb-simulation
+    \end{verbatim}
+    
+    \item \textbf{Crear e inicializar el entorno virtual de ejecución (aislamiento de dependencias):}
+    \begin{verbatim}
+    python -m venv venv
+    \end{verbatim}
+    Posteriormente, active el entorno según su sistema operativo:
+    \begin{itemize}
+        \item En sistemas Windows: \texttt{.\\venv\\Scripts\\activate}
+        \item En sistemas Linux o macOS: \texttt{source venv/bin/activate}
+    \end{itemize}
+    
+    \item \textbf{Instalar las dependencias matemáticas requeridas:}
+    \begin{verbatim}
+    pip install -r requirements.txt
+    \end{verbatim}
+    Este comando instalará las bibliotecas numéricas \texttt{numpy}, \texttt{scipy} y \texttt{matplotlib} compatibles.
+    
+    \item \textbf{Ejecutar el banco de pruebas cualitativo (Paso a Paso):}
+    \begin{verbatim}
+    python main.py
+    \end{verbatim}
+    Este comando ejecutará la transmisión del primer símbolo y guardará los gráficos de validación modular detallados en el Capítulo 2 y los resultados de canal ruidoso del Capítulo 3.
+    
+    \item \textbf{Ejecutar las curvas estadísticas Monte Carlo (BER y Throughput):}
+    \begin{verbatim}
+    python test_phy.py
+    python test_phy_grid.py
+    \end{verbatim}
+\end{enumerate}
+
+\clearpage
+
+\section*{ANEXO B. ARQUITECTURA E INTERFAZ DE FUNCIONES DEL MOTOR DE CAPA FÍSICA}
+\addcontentsline{toc}{section}{ANEXO B. ARQUITECTURA E INTERFAZ DE FUNCIONES DEL MOTOR DE CAPA FÍSICA}
+\label{anexo:estructura_funciones_simulador}
+
+El archivo \texttt{physical\_layer.py} actúa como la biblioteca o motor unificado del simulador. Todas sus funciones han sido escritas de forma modular y reutilizable, mapeando los bloques teóricos definidos en el estándar. A continuación se detallan las firmas de estas funciones de la capa física en dos partes: el transmisor y canal (Tabla \ref{tab:api_lc_tx}) y el receptor (Tabla \ref{tab:api_lc_rx}).
+
+\renewcommand{\thetable}{B.\arabic{table}}
+\setcounter{table}{0}
+
+\begin{table}[H]
+\centering
+\caption{Diccionario y Estructura de Funciones del Módulo physical\_layer.py - Transmisor y Canal}
+\label{tab:api_lc_tx}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Función en Python} & \textbf{Argumentos Principales} & \textbf{Propósito y Operación Matemática} \\ \hline
+\texttt{fec\_encoder()} & \texttt{bits} (array 1D) & Codificación convolucional de tasa $1/2$ con polinomios generadores octales $G_0=7, G_1=5$. \\ \hline
+\texttt{puncture()} & \texttt{bits, pattern} & Punzado de bits periódicos según máscara para tasas $2/3, 3/4$ o $5/6$. \\ \hline
+\texttt{interleave()} & \texttt{bits} & Entrelazado de bloques mediante transposición matricial de 16 columnas para mitigar ruidos en ráfaga. \\ \hline
+\texttt{constellation\_mapping()} & \texttt{bits, scheme} & Mapeo Gray multinivel (BPSK a 1024-QAM) con factor de escala $K_{\text{norm}} = 1/\sqrt{\frac{2}{3}(M-1)}$. \\ \hline
+\texttt{apply\_hermitian\_symmetry()} & \texttt{symbols\_in} & Mapeo de simetría conjugada en frecuencia sobre subportadoras activas (DC y Nyquist a cero) para ondas temporales reales. \\ \hline
+\texttt{idft\_processing()} & \texttt{symbols\_in} & Transformada IFFT matricial con validación del residuo imaginario inferior a $10^{-12}$. \\ \hline
+\texttt{insert\_guard\_interval()} & \texttt{signal, cp\_len} & Inserción de muestras de prefijo cíclico (64, 128 o 256 muestras a $80\text{ MHz}$). \\ \hline
+\texttt{windowing()} & \texttt{signal, roll\_off} & Suavizado temporal de flancos mediante ventana de coseno alzado para reducir lóbulos espectrales laterales. \\ \hline
+\texttt{iq\_modulation()} & \texttt{signal, f\_if, f\_s} & Conversión hacia arriba multiplicando por portadora digital a Frecuencia Intermedia de 20 MHz. \\ \hline
+\texttt{tx\_optical\_front\_end()} & \texttt{signal, min\_a, max\_a} & Suma de Bias DC adaptativo y recorte de amplitud por limitación lineal no-negativa del emisor LED. \\ \hline
+\texttt{optical\_wireless\_channel()} & \texttt{signal, d, theta, ...} & Propagación en espacio libre (Lambertiano 3D), Beer-Lambert atmosférico y adición de ruidos térmico y de disparo solar. \\ \hline
+\texttt{rx\_optical\_front\_end()} & \texttt{signal, R} & Conversión optoelectrónica en fotodetector según responsividad constante de $0.6\text{ A/W}$. \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Diccionario y Estructura de Funciones del Módulo physical\_layer.py - Receptor}
+\label{tab:api_lc_rx}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Función en Python} & \textbf{Argumentos Principales} & \textbf{Propósito y Operación Matemática} \\ \hline
+\texttt{remove\_dc\_bias()} & \texttt{signal} & Resta del promedio aritmético de la señal recibida (bloqueo de corriente continua). \\ \hline
+\texttt{iq\_demodulation()} & \texttt{signal, f\_if, f\_s} & Conversión hacia abajo a banda base y filtrado Butterworth digital de 5to orden a 15 MHz. \\ \hline
+\texttt{remove\_guard\_interval()} & \texttt{signal, cp\_len} & Descarte de las muestras iniciales del prefijo cíclico por símbolo OFDM. \\ \hline
+\texttt{dft\_processing()} & \texttt{signal} & Transformada FFT matricial para regresar los símbolos al dominio de la frecuencia. \\ \hline
+\texttt{remove\_hermitian\_symmetry()} & \texttt{symbols} & Descarte de subportadoras de guarda y conjugadas, aislando los 234 símbolos de datos. \\ \hline
+\texttt{constellation\_demapping()} & \texttt{symbols, scheme} & Demapper Gray de decisión dura evaluando distancias euclidianas mínimas en fase y cuadratura. \\ \hline
+\texttt{deinterleave()} & \texttt{bits} & Reordenamiento inverso de los bits de datos mediante matriz transpuesta de 16 columnas. \\ \hline
+\texttt{depuncture()} & \texttt{bits, pattern} & Inserción de borrados (\textit{erasures}) neutros en las posiciones de bits punzadas. \\ \hline
+\texttt{fec\_decoder()} & \texttt{bits, pattern} & Decodificador convolucional de Viterbi adaptado para omitir distancias en posiciones de borrado. \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+\clearpage
+
+\section*{ANEXO C. ESTRUCTURA COMPLETA DEL REPOSITORIO DE CÓDIGO}
+\addcontentsline{toc}{section}{ANEXO C. ESTRUCTURA COMPLETA DEL REPOSITORIO DE CÓDIGO}
+\label{anexo:estructura_archivos_simulador}
+
+En el siguiente esquema se ilustra la distribución de directorios y el propósito de cada componente del software subido al repositorio de GitHub:
+
+\begin{verbatim}
+v2i-ieee802.11bb-simulation/               # Carpeta raiz del proyecto de simulacion
+|
++-- physical_layer.py                            # Motor y biblioteca modular de capa fisica
++-- config_entorno.py                      # Centralizacion de constantes
+|
++-- main.py                                # Banco de prueba cualitativo paso a paso
++-- test_phy.py                            # Caracterizacion estadistica Monte Carlo
++-- test_phy_grid.py                       # Simulacion matricial en rejilla
+|
++-- requirements.txt                       # Librerias Python de soporte (NumPy, SciPy)
++-- README.md                              # Guia e instructivo tecnico del simulador
+|
++-- plots/                                 # Directorio para exportacion de figuras
+\end{verbatim}
