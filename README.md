@@ -4,7 +4,7 @@ Este repositorio contiene la implementación limpia y modular en Python del simu
 
 ---
 
-## 🛠️ Estructura del Código
+##  Estructura del Código
 
 El simulador está organizado en los siguientes archivos lógicos:
 
@@ -27,7 +27,7 @@ El simulador está organizado en los siguientes archivos lógicos:
 
 ---
 
-## 🚀 Cómo Ejecutar el Simulador
+##  Cómo Ejecutar el Simulador
 
 ### Requisitos Previos
 
