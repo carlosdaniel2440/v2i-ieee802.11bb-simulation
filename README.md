@@ -1,6 +1,6 @@
 # Simulador de la Capa Física (LC PHY) IEEE 802.11bb para Enlaces V2I
 
-Este directorio contiene la implementación limpia y modular en Python del simulador de la capa física de comunicaciones por luz visible (VLC) de alta eficiencia, desarrollado siguiendo las especificaciones de la enmienda **IEEE 802.11bb-2023** en enlaces de movilidad Vehículo a Infraestructura (V2I).
+Este repositorio contiene la implementación limpia y modular en Python del simulador de la capa física de comunicaciones por luz visible (VLC) de alta eficiencia, desarrollado siguiendo las especificaciones de la enmienda **IEEE 802.11bb-2023** en enlaces de movilidad Vehículo a Infraestructura (V2I).
 
 ---
 
@@ -49,4 +49,10 @@ Para ejecutar las simulaciones comparativas de Intervalos de Guarda bajo movilid
 
 ```bash
 python test_phy_grid.py
+```
+
+Para ejecutar el motor de integración cualitativo paso a paso:
+
+```bash
+python main.py
 ```

@@ -3,3 +3,17 @@ __pycache__/
 .venv/
 .idea/
 .vscode/
+
+# Ignorar archivos de tesis y documentos (mantenerlos solo de forma local)
+TESIS_LATEX/
+.agents/
+*.pdf
+*.docx
+*.DOCX
+*.pkl
+Trabajo Integracion Curricular Carlos Cacuango Cap I.DOCX
+formato.docx
+v1.pdf
+v2.pdf
+80211bb-2023 (1).pdf
+resultados_simulacion_grid.pkl
