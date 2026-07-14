@@ -5,6 +5,7 @@ Ejecuta la cadena de transmisión (TX), el canal óptico, la cadena de recepció
 mide la tasa de error de bit (BER), y genera gráficas de los procesos clave.
 """
 
+import os
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -288,10 +289,11 @@ def run_lc_simulation(solar_irradiance: float = 0.0, output_filename: str = "res
     
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     
-    # Guardar gráfica en la carpeta de la tesis y en la carpeta modular de LaTeX
-    import os
-    plot_dir_thesis = "c:\\Users\\carlo\\OneDrive\\Imágenes\\Documentos\\TESIS"
-    plot_dir_latex = "c:\\Users\\carlo\\OneDrive\\Imágenes\\Documentos\\TESIS\\TESIS_LATEX"
+    # Guardar gráfica en la carpeta del script y en un subdirectorio TESIS_LATEX local
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    plot_dir_thesis = base_dir
+    plot_dir_latex = os.path.join(plot_dir_thesis, "TESIS_LATEX")
+    os.makedirs(plot_dir_latex, exist_ok=True)
     
     plot_path = os.path.join(plot_dir_thesis, output_filename)
     plt.savefig(plot_path, dpi=300)

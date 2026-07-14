@@ -21,15 +21,15 @@ from config_entorno import (
     RESPONSIVITY, BANDWIDTH, LED_MIN, LED_MAX
 )
 
-MONTE_CARLO_RUNS = 1000  # Configurado a 1000 iteraciones por defecto
+MONTE_CARLO_RUNS = 10000  # 10 mil para preubas de funcionamiento, 1M para resultados finales
 f_s = F_S
 f_if = F_IF
 
-output_dir = r"c:\Users\carlo\OneDrive\Imágenes\Documentos\TESIS\TESIS_LATEX"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-# También guardamos en raíz
-root_dir = r"c:\Users\carlo\OneDrive\Imágenes\Documentos\TESIS"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = base_dir
+
+output_dir = root_dir
+os.makedirs(output_dir, exist_ok=True)
 
 # Selección de MCS y GIs
 mcs_list = [0, 5, 11]
@@ -298,7 +298,10 @@ if __name__ == "__main__":
         box = np.ones(window) / window
         y_smooth = np.convolve(y_arr, box, mode='same')
         y_smooth[0] = y_arr[0]
-      # --- GENERACIÓN DE LAS 9 FIGURAS (4 filas x 1 columna por cada GI) ---
+        y_smooth[-1] = y_arr[-1]
+        return y_smooth
+
+    # --- GENERACIÓN DE LAS 9 FIGURAS (4 filas x 1 columna por cada GI) ---
 
     # 1. BER vs SNR (3 figuras, una por GI)
     for gi in gis:

@@ -20,7 +20,7 @@ from config_entorno import (
     RESPONSIVITY, BANDWIDTH, LED_MIN, LED_MAX
 )
 
-MONTE_CARLO_RUNS = 100000  # Valor base para las pruebas de Monte Carlo (100k para resolucion)
+MONTE_CARLO_RUNS = 10000  # 10 mil para pruebas de funcionamiento, 1M para resultados finales
 
 # Variables de bits asignadas de forma independiente para cada simulación
 N_BITS_SOLAR = MONTE_CARLO_RUNS
@@ -33,10 +33,9 @@ GI_SELECCIONADO = "0.8us"
 
 def save_plot_dual(fig, filename):
     import os
-    path1 = os.path.join("c:\\Users\\carlo\\OneDrive\\Imágenes\\Documentos\\TESIS", filename)
-    path2 = os.path.join("c:\\Users\\carlo\\OneDrive\\Imágenes\\Documentos\\TESIS\\TESIS_LATEX", filename)
-    fig.savefig(path1, dpi=300)
-    fig.savefig(path2, dpi=300)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    output_path = os.path.join(base_dir, filename)
+    fig.savefig(output_path, dpi=300)
 
 
 def get_gi_params(gi_name: str) -> tuple[int, float]:
